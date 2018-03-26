@@ -6,9 +6,9 @@ SENG 300 Group 2 Iteration 3
 Table of Contents
 -----------------
 1. [Getting Started](#getting-started)
-3. [Resources](#Resources)
+3. [Resources](#resources)
 4. [Stuff to Keep Everyone Sane](#stuff-to-keep-everyone-sane)
-    - [Upload files button](#be-wary-of-the-"upload-files"-button-on-github)
+    - [Upload files button](#be-wary-of-the-upload-files-button-on-github)
     - [Check before pushing](#check-before-pushing)
 5. [Contact](#contact)
 
@@ -117,7 +117,7 @@ John Benedict Mendoza - johnbenedict.mendoza@ucalgary.ca
 
 Matthew Buhler - matthew.buhler@ucalgary.ca
 
-Tyler Chow - tyler.chow@ucalgary.ca
+[Tyler Chow](https://github.com/TylerChow) - tyler.chow@ucalgary.ca
 
 Dominic Demierre - dominic.demierre@ucalgary.ca
 
@@ -125,4 +125,4 @@ Dominic Demierre - dominic.demierre@ucalgary.ca
 
 Osagie Omigie - osagie.omigie@ucalgary.ca
 
-Zheng Yang Toh - zytoh@ucalgary.ca
+[Zheng Yang Toh](https://github.com/zytoh) - zytoh@ucalgary.ca
