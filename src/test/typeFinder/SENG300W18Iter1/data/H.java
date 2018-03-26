@@ -1,0 +1,1 @@
+class H { int i; }

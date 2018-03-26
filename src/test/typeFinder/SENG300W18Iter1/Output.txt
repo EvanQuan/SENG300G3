@@ -1,0 +1,8 @@
+A. Declarations found: 1; references found: 0.
+B. Declarations found: 1; references found: 9.
+C. Declarations found: 1; references found: 5.
+D. Declarations found: 1; references found: 0.
+D.E. Declarations found: 1; references found: 2.
+H. Declarations found: 1; references found: 0.
+foo.E. Declarations found: 1; references found: 4.
+int. Declarations found: 0; references found: 1.
