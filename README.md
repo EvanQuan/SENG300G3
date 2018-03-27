@@ -3,6 +3,8 @@ SENG 300 Group 2 Iteration 3
 
 [Slack Channel link](https://seng300w2018g2i3.slack.com/)
 
+[System Spreadsheet](https://docs.google.com/spreadsheets/d/1-xapWVodk4DW2dW3CrfHNiGbSCNzF-H4mEmOvLLXMmg/edit?usp=sharing)
+
 Table of Contents
 -----------------
 1. [Getting Started](#getting-started)
