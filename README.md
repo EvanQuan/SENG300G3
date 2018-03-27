@@ -113,16 +113,16 @@ Contact
 
 [Marcello Di Benedetto](https://github.com/Marcellod1) - 30031839 - marcello.dibenede1@ucalgary.ca
 
-John Benedict Mendoza - johnbenedict.mendoza@ucalgary.ca
+[John Benedict Mendoza](https://github.com/JBenedictM) - 30028470 - johnbenedict.mendoza@ucalgary.ca
 
 Matthew Buhler - matthew.buhler@ucalgary.ca
 
 [Tyler Chow](https://github.com/TylerChow) - tyler.chow@ucalgary.ca
 
-Dominic Demierre - dominic.demierre@ucalgary.ca
+[Dominic Demierre](https://github.com/dominic-demierre) - 30029784 - dominic.demierre@ucalgary.ca
 
 [Philip Dometita](https://github.com/philipdometita) - 30032976 - philip.dometita@ucalgary.ca
 
-Osagie Omigie - osagie.omigie@ucalgary.ca
+[Osagie Omigie](https://github.com/osagieomigie) - 30008204 - osagie.omigie@ucalgary.ca
 
-[Zheng Yang Toh](https://github.com/zytoh) - zytoh@ucalgary.ca
+[Zheng Yang Toh](https://github.com/zytoh) - 10129855 - zytoh@ucalgary.ca
