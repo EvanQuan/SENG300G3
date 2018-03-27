@@ -115,9 +115,9 @@ Contact
 
 [John Benedict Mendoza](https://github.com/JBenedictM) - 30028470 - johnbenedict.mendoza@ucalgary.ca
 
-Matthew Buhler - matthew.buhler@ucalgary.ca
+[Matthew Buhler](https://github.com/Eventrope) - 00332036 - matthew.buhler@ucalgary.ca
 
-[Tyler Chow](https://github.com/TylerChow) - tyler.chow@ucalgary.ca
+[Tyler Chow](https://github.com/TylerChow) - 30024575 - tyler.chow@ucalgary.ca
 
 [Dominic Demierre](https://github.com/dominic-demierre) - 30029784 - dominic.demierre@ucalgary.ca
 
