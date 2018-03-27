@@ -2,10 +2,10 @@ package test;
 
 import org.junit.Test;
 
-import main.ast.TypeVisitor;
+import main.ast.TypeVisitorI2G7;
 
 /**
- * JUnit 4 Tests for {@link TypeVisitor} class. Checks type declaration and
+ * JUnit 4 Tests for {@link TypeVisitorI2G7} class. Checks type declaration and
  * reference counts for bar.Foo
  *
  * @author Evan Quan

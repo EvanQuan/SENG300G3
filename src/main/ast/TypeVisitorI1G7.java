@@ -1,4 +1,4 @@
-package test;
+package main.ast;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
