@@ -33,13 +33,17 @@ import main.util.Multiset;
  * type T, the visitor will locate the different java types present in the
  * source code, and count the number of declarations of references for each of
  * the java types present.
- * 
- * Type and subtypes
- * http://help.eclipse.org/kepler/ntopic/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/Type.html
- * http://help.eclipse.org/kepler/ntopic/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/VariableDeclarationFragment.html
+ *
+ * TODO
+ * Detect anonymous types
+ * 	- Approach: Find MethodInvocation, or Constructor call? Constrain to only anonymous?
+ * Detect local declarations (DONE)
+ * 	- Just need to add test cases
+ * Detect nested declarations
+ * 	- Approach: Find parents of nodes recursively until either we reach the root (not nested) or 2 parents are of type class declaration (is nested)
  * 
  * @author Evan Quan
- * @version 2.5.0
+ * @version 3.0.0
  * @since 25 March 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -86,7 +90,6 @@ public class TypeVisitor extends ASTVisitor {
 	 * @param type
 	 */
 	private void incrementAnonymous(String type) {
-		incrementDeclaration(type);
 		anonymous.add(type);
 	}
 
@@ -96,7 +99,7 @@ public class TypeVisitor extends ASTVisitor {
 	 * @param type
 	 */
 	private void incrementLocal(String type) {
-		incrementDeclaration(type);
+		addTypeToList(type);
 		local.add(type);
 	}
 
@@ -106,7 +109,7 @@ public class TypeVisitor extends ASTVisitor {
 	 * @param type
 	 */
 	private void incrementNested(String type) {
-		incrementDeclaration(type);
+		addTypeToList(type);
 		nested.add(type);
 	}
 
@@ -225,6 +228,13 @@ public class TypeVisitor extends ASTVisitor {
 	public void resetToNewFile() {
 		// Imported names accumulate within a file, but not between files
 		importedNames.clear();
+	}
+	
+	/**
+	 * @return the total number of declarations made
+	 */
+	public int getDeclarationCount() {
+		return declarations.getElementCount() + anonymous.getElementCount();
 	}
 
 	/*
@@ -555,7 +565,6 @@ public class TypeVisitor extends ASTVisitor {
 	 *            : TypeDeclaration
 	 * @return boolean : True to visit the children of this node
 	 */
-	// TODO This is to be override by children nodes
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding typeBind = node.resolveBinding();
@@ -564,7 +573,8 @@ public class TypeVisitor extends ASTVisitor {
 		// Local classes do not have qualified names, only simple names
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
-			debug("TypeDclaration LOCAL", type);
+			debug("TypeDcelaration LOCAL", type);
+			incrementLocal(type);
 		} else {
 			debug("TypeDeclaration", type);
 		}

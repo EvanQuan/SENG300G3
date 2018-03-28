@@ -9,8 +9,8 @@ import main.ast.TypeVisitor;
  * reference counts for bar.Foo
  *
  * @author Evan Quan
- * @version 1.0.0
- * @since 12 March 2018
+ * @version 3.0.0
+ * @since 28 March 2018
  *
  */
 public class TypeVisitorPackageFooTest extends TypeVisitorTest {
@@ -154,6 +154,31 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	public void test_SetStaticFieldQualified_Dec_0_Ref_1() {
 		configureParser("package other; public class Other { public void method() { bar.Foo.staticField = 3;} }", type,
 				0, 1);
+	}
+	
+	/**
+	 * Check that using a marker annotation fully qualified name accounts for package
+	 */
+	@Test
+	public void test_MarkerAnnotation_CurrentPackage_Dec_0_Ref_1() {
+		configureParser("package bar; public class Other { @Foo public void method{} }", type, 0, 1);
+	}
+	
+	/**
+	 * Check that importing a marker annotation keeps the fully qualified name and overrides package qualifier
+	 */
+	@Test
+	public void test_MarkerAnnotation_Imported_Dec_0_Ref_1() {
+		configureParser("package other; import bar.Foo; public class Other { @Foo public void method{} }", type, 0, 1);
+	}
+	
+
+	/**
+	 * Check that explicitly using the fully qualified name for marker annotation works
+	 */
+	@Test
+	public void test_MarkerAnnotation_Qualified_Dec_0_Ref_1() {
+		configureParser("package other; public class Other { @bar.Foo public void method{} }", type, 0, 1);
 	}
 
 }

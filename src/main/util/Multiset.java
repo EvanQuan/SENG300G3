@@ -6,21 +6,21 @@ import java.util.HashMap;
  * Can contain multiple quantities of each element.
  * 
  * @author Evan Quan
- * @version 1.1.0
+ * @version 1.2.0
  * @since 28 March, 2018
  *
- * @param <T>
+ * @param <E>
  *            type of element contained in multiset
  */
-public class Multiset<T> {
+public class Multiset<E> {
 
-	private HashMap<T, Integer> elements;
+	private HashMap<E, Integer> elements;
 
 	/**
 	 * Constructs an empty multiset
 	 */
 	public Multiset() {
-		elements = new HashMap<T, Integer>();
+		elements = new HashMap<E, Integer>();
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class Multiset<T> {
 	 * 
 	 * @param element
 	 */
-	public void add(T element) {
+	public void add(E element) {
 		add(element, 1);
 	}
 
@@ -38,7 +38,7 @@ public class Multiset<T> {
 	 * @param element
 	 * @param count
 	 */
-	public void add(T element, int count) {
+	public void add(E element, int count) {
 		int newCount = count(element) + count;
 		if (newCount > 0) {
 			elements.put(element, newCount);
@@ -53,7 +53,7 @@ public class Multiset<T> {
 	 * @param element
 	 * @return count of element
 	 */
-	public int count(T element) {
+	public int count(E element) {
 		if (elements.containsKey(element)) {
 			return elements.get(element);
 		} else {
@@ -66,7 +66,7 @@ public class Multiset<T> {
 	 * 
 	 * @param element
 	 */
-	public void remove(T element) {
+	public void remove(E element) {
 		remove(element, 1);
 	}
 
@@ -77,7 +77,7 @@ public class Multiset<T> {
 	 * @param count
 	 * @return true is elements are removed, else false
 	 */
-	public void remove(T element, int count) {
+	public void remove(E element, int count) {
 		add(element, -count);
 	}
 
@@ -87,7 +87,7 @@ public class Multiset<T> {
 	 * @param element
 	 * @return true is elements removed, else false
 	 */
-	public boolean removeAll(T element) {
+	public boolean removeAll(E element) {
 		if ((elements.remove(element)) == null) {
 			return false;
 		} else {
@@ -108,5 +108,25 @@ public class Multiset<T> {
 	 */
 	public boolean isEmpty() {
 		return elements.isEmpty();
+	}
+	
+	/**
+	 * 
+	 * @return the number of element types contained in this multiset
+	 */
+	public int getTypeCount() {
+		return elements.size();
+	}
+	
+	/**
+	 * 
+	 * @return the total number of elements contained in this multiset
+	 */
+	public int getElementCount() {
+		int total = 0;
+		for (E element : elements.keySet()) {
+			total += elements.get(element);
+		}
+		return total;
 	}
 }
