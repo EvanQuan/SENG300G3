@@ -47,11 +47,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 public class TypeVisitorI2G7 extends ASTVisitor {
 
 	// Global variables
-	private static ArrayList<String> types = new ArrayList<String>();
+	private ArrayList<String> types;
 
-	private static HashMap<String, Integer> decCounter = new HashMap<String, Integer>();
+	private HashMap<String, Integer> decCounter;
 
-	private static HashMap<String, Integer> refCounter = new HashMap<String, Integer>();
+	private HashMap<String, Integer> refCounter;
 
 	/**
 	 * Checks if the passed type already exists within the types list. [false -> add
@@ -61,7 +61,7 @@ public class TypeVisitorI2G7 extends ASTVisitor {
 	 * @param type:
 	 *            String, java type
 	 */
-	private static void addTypeToList(String type) {
+	private void addTypeToList(String type) {
 		if (!types.contains(type)) {
 			types.add(type);
 			decCounter.put(type, 0);
@@ -75,7 +75,7 @@ public class TypeVisitorI2G7 extends ASTVisitor {
 	 * @param type
 	 *            String, java type
 	 */
-	private static void incDecCount(String type) {
+	private void incDecCount(String type) {
 		// Check if the type exists, then increment their associated value by 1
 		if (decCounter.containsKey(type)) {
 			decCounter.put(type, decCounter.get(type) + 1);
@@ -88,14 +88,14 @@ public class TypeVisitorI2G7 extends ASTVisitor {
 	 * @param type
 	 *            String, java type
 	 */
-	private static void incRefCount(String type) {
+	private void incRefCount(String type) {
 		// Check if the type exists, then increment their associated value by 1
 		if (refCounter.containsKey(type)) {
 			refCounter.put(type, refCounter.get(type) + 1);
 		}
 	}
 
-	public static void printTypes() {
+	public void printTypes() {
 		for (String type : types) {
 			int refCount = refCounter.get(type);
 			int decCount = decCounter.get(type);
@@ -112,6 +112,10 @@ public class TypeVisitorI2G7 extends ASTVisitor {
 	 * constructor, removed implementation
 	 */
 	public TypeVisitorI2G7() {
+		types = new ArrayList<String>();
+		decCounter = new HashMap<String, Integer>();
+		refCounter = new HashMap<String, Integer>();
+
 	}
 
 	/**

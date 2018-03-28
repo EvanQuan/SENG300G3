@@ -20,7 +20,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 public class TypeVisitorI2G9 extends ASTVisitor {
 
-	public static HashMap<String, ArrayList<Integer>> typeMap = new HashMap<String, ArrayList<Integer>>();
+	public HashMap<String, ArrayList<Integer>> typeMap;
+
+	public TypeVisitorI2G9() {
+		typeMap = new HashMap<String, ArrayList<Integer>>();
+	}
 
 	/**
 	 * finds Type Declarations and adds to declarationCounter if the node string

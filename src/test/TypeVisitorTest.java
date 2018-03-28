@@ -3,6 +3,7 @@ package test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -34,34 +35,52 @@ import main.file.FileManager;
  */
 public abstract class TypeVisitorTest {
 
+	protected static final int IGNORE_REFERENCES = -1;
 	// Scores
 	// Success : Error : Failure
 
 	// Current visitor
-	public static final int MAIN = 0; // 120:0:0
+	public static final int MAIN = 302; // 121:0:0
 	// Iteration 1 visitors
-	public static final int I1G2 = 102; // 30:0:90
-	public static final int I1G7 = 107; // 52:0:68
-	public static final int I1G8 = 108; // 88:0:32
-	public static final int I1G11 = 111; // 84:0:36
-	public static final int I1G12 = 112; // 83:0:37
+	public static final int I1G2 = 102; // 31:0:90
+	public static final int I1G7 = 107; // 53:0:68
+	public static final int I1G8 = 108; // 89:0:32
+	public static final int I1G11 = 111; // 85:0:36
+	public static final int I1G12 = 112; // 84:0:37
 	// Iteration 2
-	public static final int I2G1 = 201; // 94:2:26
-	public static final int I2G2 = 202; // 120:0:0
-	public static final int I2G4 = 204; // 93:0:27
-	public static final int I2G7 = 207; // 14:0:106
-	public static final int I2G8 = 208; // 71:0:41
-	public static final int I2G9 = 209; // 1:0:119
+	public static final int I2G1 = 201; // 95:2:26
+	public static final int I2G2 = 202; // 121:0:0
+	public static final int I2G4 = 204; // 94:0:27
+	public static final int I2G7 = 207; // 93:0:28
+	public static final int I2G8 = 208; // 89:0:32
+	public static final int I2G9 = 209; // 10:0:111
 	protected static String ls = FileManager.lineSeparator;
 	protected static boolean debug = true;
 
 	/**
 	 * Change this to the visitor that you want to test
 	 */
-	public static final int CURRENT_VISITOR_TO_TEST = I2G4;
+	public static final int CURRENT_VISITOR_TO_TEST = MAIN;
 
 	/**
-	 * Determines which Visitor to use
+	 * Iteration 3 tests. Only checks Main visitor. Ignores referenceCount.
+	 * 
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedAnonymousCount
+	 * @param expectedLocalCount
+	 * @param expectedNestedCount
+	 */
+	protected static void configureParser(String source, String type, int expectedDeclarationCount,
+			int expectedAnonymousCount, int expectedLocalCount, int expectedNestedCount) {
+		configureParserMain(source, type, expectedDeclarationCount, IGNORE_REFERENCES, expectedAnonymousCount,
+				expectedLocalCount, expectedNestedCount);
+	}
+
+	/**
+	 * Determines which Visitor to use Accounts for to iteration 2 and below
+	 * requirements (setting anonymous, local and nested counts to 0)
 	 *
 	 * @param source
 	 * @param type
@@ -72,7 +91,7 @@ public abstract class TypeVisitorTest {
 			int expectedReferenceCount) {
 		switch (CURRENT_VISITOR_TO_TEST) {
 		case MAIN:
-			configureParserMain(source, type, expectedDeclarationCount, expectedReferenceCount);
+			configureParserMain(source, type, expectedDeclarationCount, expectedReferenceCount, 0, 0, 0);
 			break;
 		case I1G2:
 			configureParser_1_2(source, type, expectedDeclarationCount, expectedReferenceCount);
@@ -107,8 +126,62 @@ public abstract class TypeVisitorTest {
 			configureParser_2_9(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
 		default:
-			configureParserMain(source, type, expectedDeclarationCount, expectedReferenceCount);
+			configureParserMain(source, type, expectedDeclarationCount, expectedReferenceCount, 0, 0, 0);
 		}
+	}
+
+	/**
+	 * Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount, int expectedAnonymousCount, int expectedLocalCount, int expectedNestedCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitor visitor = new TypeVisitor();
+		cu.accept(visitor);
+
+		int declarationCount = visitor.getDeclarations().count(type);
+		int referenceCount = visitor.getReferences().count(type);
+
+		int anonymousCount = visitor.getAnonymous().count(type);
+		int localCount = visitor.getLocal().count(type);
+		int nestedCount = visitor.getNested().count(type);
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		// Iteration 3 test test cases ignore reference count
+		if (referenceCount != IGNORE_REFERENCES) {
+			assertEquals(expectedReferenceCount, referenceCount);
+		}
+
+		assertEquals(expectedAnonymousCount, anonymousCount);
+		assertEquals(expectedLocalCount, localCount);
+		assertEquals(expectedNestedCount, nestedCount);
+
 	}
 
 	/**
@@ -463,12 +536,12 @@ public abstract class TypeVisitorTest {
 		int declarationCount = 0;
 		int referenceCount = 0;
 		try {
-			declarationCount = visitor.getDeclarations().get(type);
+			declarationCount = visitor.getDeclarations().count(type);
 		} catch (Exception e) {
 
 		}
 		try {
-			referenceCount = visitor.getReferences().get(type);
+			referenceCount = visitor.getReferences().count(type);
 		} catch (Exception e) {
 
 		}
@@ -612,8 +685,8 @@ public abstract class TypeVisitorTest {
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 		parser.setCompilerOptions(options);
-
-		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		//
+		// CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 		// ASTParser parser = ASTParser.newParser(AST.JLS9);
 		// parser.setSource(source.toCharArray());
 		// parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -630,7 +703,7 @@ public abstract class TypeVisitorTest {
 		// parser.setUnitName("temp.java");
 
 		// Adding bindings
-		// CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
 		TypeVisitorI2G8 visitor = new TypeVisitorI2G8();
 		cu.accept(visitor);
@@ -706,56 +779,4 @@ public abstract class TypeVisitorTest {
 
 	}
 
-	/**
-	 * Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitor visitor = new TypeVisitor();
-		cu.accept(visitor);
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-		try {
-			declarationCount = visitor.getDeclarations().get(type);
-		} catch (Exception e) {
-
-		}
-		try {
-			referenceCount = visitor.getReferences().get(type);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
 }

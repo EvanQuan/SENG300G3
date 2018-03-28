@@ -168,8 +168,8 @@ public class TypeFinder {
 		Collections.sort(types);
 
 		for (String type : types) {
-			int declarationCount = visitor.getDeclarations().get(type);
-			int referenceCount = visitor.getReferences().get(type);
+			int declarationCount = visitor.getDeclarations().count(type);
+			int referenceCount = visitor.getReferences().count(type);
 			System.out.println(
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}

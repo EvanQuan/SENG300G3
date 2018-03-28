@@ -6,83 +6,84 @@ import java.util.HashMap;
  * Can contain multiple quantities of each element.
  * 
  * @author Evan Quan
- * @version 1.0.0
- * @since 21 March, 2018
+ * @version 1.1.0
+ * @since 28 March, 2018
  *
- * @param <T> type of element contained in multiset
+ * @param <T>
+ *            type of element contained in multiset
  */
 public class Multiset<T> {
 
 	private HashMap<T, Integer> elements;
-	
+
+	/**
+	 * Constructs an empty multiset
+	 */
 	public Multiset() {
 		elements = new HashMap<T, Integer>();
 	}
-	
+
 	/**
 	 * Add 1 element to multiset
+	 * 
 	 * @param element
 	 */
 	public void add(T element) {
 		add(element, 1);
 	}
-	
+
 	/**
 	 * Add count number of elements to multiset
+	 * 
 	 * @param element
 	 * @param count
 	 */
 	public void add(T element, int count) {
-		if (elements.containsKey(element)) {
-			elements.put(element, elements.get(element) + 1);
+		int newCount = count(element) + count;
+		if (newCount > 0) {
+			elements.put(element, newCount);
 		} else {
-			elements.put(element, 1);
+			elements.remove(element);
 		}
 	}
-	
+
 	/**
 	 * Get count of element in multiset
+	 * 
 	 * @param element
 	 * @return count of element
 	 */
-	public int get(T element) {
+	public int count(T element) {
 		if (elements.containsKey(element)) {
 			return elements.get(element);
 		} else {
 			return 0;
 		}
 	}
-	
+
 	/**
 	 * Remove 1 element from multiset
+	 * 
 	 * @param element
-	 * @return true is element removed, else false
 	 */
-	public boolean remove(T element) {
-		return remove(element, 1);
+	public void remove(T element) {
+		remove(element, 1);
 	}
-	
+
 	/**
 	 * Remove count number of elements to multiset
+	 * 
 	 * @param element
 	 * @param count
-	 * @return true is elements are removed, elase false
+	 * @return true is elements are removed, else false
 	 */
-	public boolean remove(T element, int count) {
-		if (elements.containsKey(element)) {
-			if (count >= elements.get(element)) {
-				elements.remove(element);
-			} else {
-				elements.put(element, elements.get(element) - count);
-			}
-			return true;
-		} else {
-			return false;
-		}
+	public void remove(T element, int count) {
+		add(element, -count);
 	}
-	
+
 	/**
 	 * Remove all elements from multiset
+	 * 
 	 * @param element
 	 * @return true is elements removed, else false
 	 */
@@ -93,15 +94,14 @@ public class Multiset<T> {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Empties multiset
 	 */
 	public void clear() {
 		elements.clear();
 	}
-	
-	
+
 	/**
 	 * 
 	 * @return true if multiset is empty

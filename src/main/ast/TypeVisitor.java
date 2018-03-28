@@ -47,6 +47,9 @@ public class TypeVisitor extends ASTVisitor {
 	private boolean debug;
 	private ArrayList<String> types;
 	private Multiset<String> declarations;
+	private Multiset<String> anonymous;
+	private Multiset<String> local;
+	private Multiset<String> nested;
 	private Multiset<String> references;
 	private String packageName;
 	private ArrayList<String> importedNames;
@@ -66,7 +69,7 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Increment the counter value for a given type in decCounter.
+	 * Increment the declaration count for a given type.
 	 *
 	 * @param type
 	 *            String, java type
@@ -78,7 +81,37 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Increment the counter value for a given type in refCounter.
+	 * Increment the anonymous declaration count for a given type.
+	 * 
+	 * @param type
+	 */
+	private void incrementAnonymous(String type) {
+		incrementDeclaration(type);
+		anonymous.add(type);
+	}
+
+	/**
+	 * Increment the local declaration count for a given type.
+	 * 
+	 * @param type
+	 */
+	private void incrementLocal(String type) {
+		incrementDeclaration(type);
+		local.add(type);
+	}
+
+	/**
+	 * Increment the nested declaration count for a given type.
+	 * 
+	 * @param type
+	 */
+	private void incrementNested(String type) {
+		incrementDeclaration(type);
+		nested.add(type);
+	}
+
+	/**
+	 * Increment the reference count for a given type.
 	 *
 	 * @param type
 	 *            String, java type
@@ -124,12 +157,15 @@ public class TypeVisitor extends ASTVisitor {
 		this.debug = debug;
 		this.types = new ArrayList<String>();
 		this.declarations = new Multiset<String>();
+		this.anonymous = new Multiset<String>();
+		this.local = new Multiset<String>();
+		this.nested = new Multiset<String>();
 		this.references = new Multiset<String>();
 		this.importedNames = new ArrayList<String>();
 	}
 
 	/**
-	 * Accessor method. Fetches the map of declarations.
+	 * Get count of all declarations found.
 	 *
 	 * @return declarations
 	 */
@@ -138,7 +174,34 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Accessor method. Fetches the list of types.
+	 * Get count of all anonymous declarations found.
+	 *
+	 * @return declarations
+	 */
+	public Multiset<String> getAnonymous() {
+		return anonymous;
+	}
+
+	/**
+	 * Get count of all local declarations found.
+	 *
+	 * @return declarations
+	 */
+	public Multiset<String> getLocal() {
+		return local;
+	}
+
+	/**
+	 * Get count of all nested declarations found.
+	 *
+	 * @return declarations
+	 */
+	public Multiset<String> getNested() {
+		return nested;
+	}
+
+	/**
+	 * Get list of all types found.
 	 *
 	 * @return types
 	 */
@@ -147,16 +210,17 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Accessor method. Fetches the map of references.
+	 * Get count of all references found.
 	 *
 	 * @return references
 	 */
 	public Multiset<String> getReferences() {
 		return references;
 	}
-	
+
 	/**
-	 * Add hoc solution. Call before every time visitor is accepted
+	 * Add hoc solution. Call before every time visitor is accepted. TODO IS there a
+	 * better way to do this?
 	 */
 	public void resetToNewFile() {
 		// Imported names accumulate within a file, but not between files
@@ -234,11 +298,9 @@ public class TypeVisitor extends ASTVisitor {
 
 		return true;
 	}
-	
+
 	/**
-	 * Used to detect static field calls.
-	 * type: Class.field
-	 * qualifier: Class
+	 * Used to detect static field calls. type: Class.field qualifier: Class
 	 */
 	@Override
 	public boolean visit(QualifiedName node) {
@@ -247,7 +309,7 @@ public class TypeVisitor extends ASTVisitor {
 		debug("\tnode.getName(): " + node.getName());
 		debug("\tnode.getFullyQualifiedName(): " + node.getFullyQualifiedName());
 		debug("\tnode.getQualifier(): " + node.getQualifier());
-		
+
 		// RETURN HERE
 		Name qualifier = node.getQualifier();
 		String qualifierName = qualifier.getFullyQualifiedName();
@@ -259,9 +321,9 @@ public class TypeVisitor extends ASTVisitor {
 		ASTNode parent = node.getParent();
 		Class<? extends ASTNode> parentNode = parent.getClass();
 		String parentNodeName = parentNode.getSimpleName();
-		
+
 		debug("\tParent: " + parentNodeName);
-//
+		//
 		// Check parent.
 		// VariableDeclarationFragment means staticField returned
 		// Assignment means static field set
@@ -279,8 +341,7 @@ public class TypeVisitor extends ASTVisitor {
 		ASTNode parent = node.getParent();
 		Class<? extends ASTNode> parentNode = parent.getClass();
 		String parentNodeName = parentNode.getSimpleName();
-		
-		
+
 		// Check parent.
 		// MethodInvocation means staticMethod is called
 		if (parentNode.equals(MethodInvocation.class)) {
@@ -296,12 +357,12 @@ public class TypeVisitor extends ASTVisitor {
 
 	@Override
 	public void preVisit(ASTNode node) {
-//		debug("\n\nPREVISIT");
+		// debug("\n\nPREVISIT");
 	}
-	
+
 	@Override
 	public void postVisit(ASTNode node) {
-//		debug("POSTVISIT");
+		// debug("POSTVISIT");
 	}
 
 	/**
@@ -325,7 +386,7 @@ public class TypeVisitor extends ASTVisitor {
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(PackageDeclaration node) {
 		IPackageBinding packageBind = node.resolveBinding();
@@ -333,9 +394,10 @@ public class TypeVisitor extends ASTVisitor {
 		debug("PackageDeclaration", packageName);
 		return true;
 	}
-	
+
 	/**
 	 * Append the current package name to name if it exists
+	 * 
 	 * @param name
 	 * @return
 	 */
@@ -343,7 +405,8 @@ public class TypeVisitor extends ASTVisitor {
 		debug("\tBEFORE APPEND:" + name);
 		// Do not append package name if in default package
 		// Do not append package name if imported from default package
-		//	NOTE: It is not valid Java syntax to import from the default package, but this must be considered anyways.
+		// NOTE: It is not valid Java syntax to import from the default package, but
+		// this must be considered anyways.
 		if ((packageName != null && !name.contains(".")) && !importedNames.contains(name)) {
 			name = packageName + "." + name;
 		}
@@ -363,7 +426,8 @@ public class TypeVisitor extends ASTVisitor {
 		String nameSimple = typeBind.getTypeDeclaration().getName();
 
 		// Add package name if does not contain package name and not in default package
-		// If imported from default package (which is not valid Java syntax), it will count
+		// If imported from default package (which is not valid Java syntax), it will
+		// count
 		// as a reference to the default package and not append the current package name
 		IPackageBinding packBind = typeBind.getPackage();
 		String packName = packBind.getName();
@@ -381,20 +445,16 @@ public class TypeVisitor extends ASTVisitor {
 		incrementReference(nameQualified);
 		debug("SimpleType qualified", nameQualified);
 
-
 		return true;
 	}
 
-
 	/**
-	 * import bar.Foo;
-	 * Gets "bar.Foo"
+	 * import bar.Foo; Gets "bar.Foo"
 	 * 
-	 * import C;
-	 * Gets "C" (even though you cannot legally import from the default package)
+	 * import C; Gets "C" (even though you cannot legally import from the default
+	 * package)
 	 * 
-	 * import bar.*;
-	 * Gets nothing
+	 * import bar.*; Gets nothing
 	 */
 	@Override
 	public boolean visit(ImportDeclaration node) {
@@ -441,7 +501,6 @@ public class TypeVisitor extends ASTVisitor {
 		return true;
 	}
 
-
 	/**
 	 * Visits normal annotation AST node type. @ TypeName ( [ MemberValuePair { ,
 	 * MemberValuePair } ] )
@@ -458,7 +517,7 @@ public class TypeVisitor extends ASTVisitor {
 	 *            NormalAnnotation
 	 * @return boolean true to visit its children nodes
 	 */
-//	@Override
+	// @Override
 	@Override
 	public boolean visit(NormalAnnotation node) {
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
@@ -470,7 +529,7 @@ public class TypeVisitor extends ASTVisitor {
 
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(SingleMemberAnnotation node) {
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();

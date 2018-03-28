@@ -10,24 +10,31 @@ import org.junit.runners.Suite;
 /**
  * All Test suites go here.
  */
-//@Suite.SuiteClasses({ FileManagerTest.class, JavaFileTest.class, JavaRetrieverTest.class, PassTest.class, TypeFinderDirectoryTest.class, TypeFinderJarTest.class, TypeVisitorBuiltInTest.class, TypeVisitorInnerFooTest.class, TypeVisitorFooTest.class,
-//		TypeVisitorPrimitiveTest.class, TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
+// @Suite.SuiteClasses({ FileManagerTest.class, JavaFileTest.class,
+// JavaRetrieverTest.class, PassTest.class,
+// TypeFinderDirectoryTest.class, TypeFinderJarTest.class,
+// TypeVisitorAnonymousTest.class,
+// TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class,
+// TypeVisitorNestedTest.class, TypeVisitorFooTest.class,
+// TypeVisitorPrimitiveTest.class, TypeVisitorFooArrayTest.class,
+// TypeVisitorPackageFooTest.class })
 
 // Just visitor
-@Suite.SuiteClasses({ TypeVisitorBuiltInTest.class, TypeVisitorInnerFooTest.class, TypeVisitorFooTest.class,
-		TypeVisitorPrimitiveTest.class, TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
+@Suite.SuiteClasses({ TypeVisitorAnonymousTest.class, TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class,
+		TypeVisitorNestedTest.class, TypeVisitorFooTest.class, TypeVisitorPrimitiveTest.class,
+		TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
 /**
  * Runs all test classes
  *
  * @author Evan Quan
- * @version 2.3.0
- * @since 26 March 2018
+ * @version 3.0.0
+ * @since 28 March 2018
  *
  */
 public class _TestSuite {
 	/**
-	 * Base directory is always root of the entire eclipse project (which is the PARENT
-	 * of the src folder).
+	 * Base directory is always root of the entire eclipse project (which is the
+	 * PARENT of the src folder).
 	 */
 	public static final String BASEDIR = new File("").getAbsolutePath().concat("/");
 	public static final String SOURCE_DIR = BASEDIR.concat("src/");
