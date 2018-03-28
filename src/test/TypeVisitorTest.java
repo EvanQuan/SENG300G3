@@ -18,12 +18,15 @@ import main.ast.TypeVisitorI1G12;
 import main.ast.TypeVisitorI1G2;
 import main.ast.TypeVisitorI1G7;
 import main.ast.TypeVisitorI1G8;
+import main.ast.TypeVisitorI2G1;
+import main.ast.TypeVisitorI2G2;
 import main.ast.TypeVisitorI2G7;
+import main.ast.TypeVisitorI2G8;
 import main.ast.TypeVisitorI2G9;
 import main.file.FileManager;
 
 /**
- * 
+ *
  * @author Evan Quan
  * @version 2.1.0
  * @since 27 March 2018
@@ -32,32 +35,34 @@ import main.file.FileManager;
 public abstract class TypeVisitorTest {
 
 	// Scores
-	// Success: Failure
+	// Success : Error : Failure
 
 	// Current visitor
-	public static final int MAIN = 0; // 120:0
+	public static final int MAIN = 0; // 120:0:0
 	// Iteration 1 visitors
-	public static final int I1G2 = 102; // 30:90
-	public static final int I1G7 = 107; // 52:68
-	public static final int I1G8 = 108; // 88:32
-	public static final int I1G11 = 111; // 84:36
-	public static final int I1G12 = 112; // 83:37
+	public static final int I1G2 = 102; // 30:0:90
+	public static final int I1G7 = 107; // 52:0:68
+	public static final int I1G8 = 108; // 88:0:32
+	public static final int I1G11 = 111; // 84:0:36
+	public static final int I1G12 = 112; // 83:0:37
 	// Iteration 2
-	public static final int I2G2 = 202; // 120:0
-	public static final int I2G4 = 204; // 93:27
-	public static final int I2G7 = 207; // 14:106
-	public static final int I2G9 = 209; // 1:119
+	public static final int I2G1 = 201; // 94:2:26
+	public static final int I2G2 = 202; // 120:0:0
+	public static final int I2G4 = 204; // 93:0:27
+	public static final int I2G7 = 207; // 14:0:106
+	public static final int I2G8 = 208; // 71:0:41
+	public static final int I2G9 = 209; // 1:0:119
 	protected static String ls = FileManager.lineSeparator;
 	protected static boolean debug = true;
 
 	/**
 	 * Change this to the visitor that you want to test
 	 */
-	public static final int CURRENT_VISITOR_TO_TEST = MAIN;
+	public static final int CURRENT_VISITOR_TO_TEST = I2G4;
 
 	/**
 	 * Determines which Visitor to use
-	 * 
+	 *
 	 * @param source
 	 * @param type
 	 * @param expectedDeclarationCount
@@ -83,6 +88,9 @@ public abstract class TypeVisitorTest {
 		case I1G12:
 			configureParser_1_12(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
+		case I2G1:
+			configureParser_2_1(source, type, expectedDeclarationCount, expectedReferenceCount);
+			break;
 		case I2G2:
 			configureParser_2_2(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
@@ -92,380 +100,15 @@ public abstract class TypeVisitorTest {
 		case I2G7:
 			configureParser_2_7(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
+		case I2G8:
+			configureParser_2_8(source, type, expectedDeclarationCount, expectedReferenceCount);
+			break;
 		case I2G9:
 			configureParser_2_9(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
 		default:
 			configureParserMain(source, type, expectedDeclarationCount, expectedReferenceCount);
 		}
-	}
-
-	/**
-	 * Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitor visitor = new TypeVisitor();
-		cu.accept(visitor);
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-		try {
-			declarationCount = visitor.getDeclarations().get(type);
-		} catch (Exception e) {
-
-		}
-		try {
-			referenceCount = visitor.getReferences().get(type);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
-
-	/**
-	 * Iteration 2 Group 2
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParser_2_2(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitor visitor = new TypeVisitor();
-		cu.accept(visitor);
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-		try {
-			declarationCount = visitor.getDeclarations().get(type);
-		} catch (Exception e) {
-
-		}
-		try {
-			referenceCount = visitor.getReferences().get(type);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
-
-	/**
-	 * Iteration 2 Group 4
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParser_2_4(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeCounterI2G4 counter = new TypeCounterI2G4();
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-
-		ArrayList<TargetType> types = counter.count(cu);
-
-		for (TargetType t : types) {
-			if (t.getType().equals(type)) {
-				declarationCount = t.getDec();
-				referenceCount = t.getRef();
-				break;
-			}
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
-
-	/**
-	 * ITERATION 2 GROUP 7 Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParser_2_7(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitorI2G7 visitor = new TypeVisitorI2G7();
-		cu.accept(visitor);
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-		try {
-			declarationCount = visitor.getDecCount().get(type);
-		} catch (Exception e) {
-
-		}
-		try {
-			referenceCount = visitor.getRefCount().get(type);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
-
-	/**
-	 * ITERATION 2 GROUP 9 Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param type
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	protected static void configureParser_2_9(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitorI2G9 visitor = new TypeVisitorI2G9();
-		cu.accept(visitor);
-
-		int declarationCount = 0;
-		int referenceCount = 0;
-		try {
-			declarationCount = visitor.typeMap.get(type).get(1);
-		} catch (Exception e) {
-
-		}
-		try {
-			referenceCount = visitor.typeMap.get(type).get(0);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
-
-	}
-
-	/**
-	 * ITERATION 1 GROUP 2 Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	private static void configureParser_1_2(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitorI1G2 visitor = new TypeVisitorI1G2(type);
-		cu.accept(visitor);
-
-		int decl_count = 0;
-		int ref_count = 0;
-		try {
-			decl_count = visitor.typeDecCount();
-		} catch (Exception e) {
-
-		}
-		try {
-			ref_count = visitor.typeRefCount();
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, decl_count);
-		assertEquals(expectedReferenceCount, ref_count);
-
-	}
-
-	/**
-	 * ITERATION 1 GROUP 8 Configures ASTParser and visitor for source file
-	 *
-	 * @param source
-	 * @param expectedDeclarationCount
-	 * @param expectedReferenceCount
-	 */
-	private static void configureParser_1_8(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		// these are needed for binding to be resolved due to SOURCE is a char[]
-		String[] srcPath = { _TestSuite.SOURCE_DIR };
-		String[] classPath = { _TestSuite.BIN_DIR };
-		parser.setEnvironment(classPath, srcPath, null, true);
-		// parser.setEnvironment(null, null, null, true);
-		// TODO: Fix up the name to be something other than name?
-		parser.setUnitName("Name");
-
-		// ensures nodes are being parsed properly
-		Map<String, String> options = JavaCore.getOptions();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		parser.setCompilerOptions(options);
-
-		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-
-		TypeVisitorI1G8 visitor = new TypeVisitorI1G8();
-		cu.accept(visitor);
-
-		int decl_count = 0;
-		int ref_count = 0;
-		try {
-			decl_count = visitor.getDecCount().get(type);
-		} catch (Exception e) {
-
-		}
-		try {
-			ref_count = visitor.getRefCount().get(type);
-		} catch (Exception e) {
-
-		}
-
-		assertEquals(expectedDeclarationCount, decl_count);
-		assertEquals(expectedReferenceCount, ref_count);
-
 	}
 
 	/**
@@ -575,6 +218,58 @@ public abstract class TypeVisitorTest {
 	}
 
 	/**
+	 * ITERATION 1 GROUP 2 Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	private static void configureParser_1_2(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI1G2 visitor = new TypeVisitorI1G2(type);
+		cu.accept(visitor);
+
+		int decl_count = 0;
+		int ref_count = 0;
+		try {
+			decl_count = visitor.typeDecCount();
+		} catch (Exception e) {
+
+		}
+		try {
+			ref_count = visitor.typeRefCount();
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, decl_count);
+		assertEquals(expectedReferenceCount, ref_count);
+
+	}
+
+	/**
 	 * Iteration 1 GROUP 7 Configures ASTParser and visitor for source file
 	 *
 	 * @param source
@@ -623,5 +318,444 @@ public abstract class TypeVisitorTest {
 
 		assertEquals(expectedDeclarationCount, declarationCount);
 		assertEquals(expectedReferenceCount, referenceCount);
+	}
+
+	/**
+	 * ITERATION 1 GROUP 8 Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	private static void configureParser_1_8(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI1G8 visitor = new TypeVisitorI1G8();
+		cu.accept(visitor);
+
+		int decl_count = 0;
+		int ref_count = 0;
+		try {
+			decl_count = visitor.getDecCount().get(type);
+		} catch (Exception e) {
+
+		}
+		try {
+			ref_count = visitor.getRefCount().get(type);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, decl_count);
+		assertEquals(expectedReferenceCount, ref_count);
+
+	}
+
+	/**
+	 * Iteration 2 Group 2
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_1(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G1 visitor = new TypeVisitorI2G1();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.countMap.get(type).getDeclarationCount();
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.countMap.get(type).getReferenceCount();
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * Iteration 2 Group 2
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_2(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G2 visitor = new TypeVisitorI2G2();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.getDeclarations().get(type);
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.getReferences().get(type);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * Iteration 2 Group 4
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_4(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeCounterI2G4 counter = new TypeCounterI2G4();
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+
+		ArrayList<TargetType> types = counter.count(cu);
+
+		for (TargetType t : types) {
+			if (t.getType().equals(type)) {
+				declarationCount = t.getDec();
+				referenceCount = t.getRef();
+				break;
+			}
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * ITERATION 2 GROUP 7 Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_7(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		// String[] srcPath = { _TestSuite.SOURCE_DIR };
+		// String[] classPath = { _TestSuite.BIN_DIR };
+		// parser.setEnvironment(classPath, srcPath, null, true);
+		parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G7 visitor = new TypeVisitorI2G7();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.getDecCount().get(type);
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.getRefCount().get(type);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * ITERATION 2 GROUP 8 Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_8(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		// ASTParser parser = ASTParser.newParser(AST.JLS9);
+		// parser.setSource(source.toCharArray());
+		// parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		// Hashtable<String, String> options = JavaCore.getOptions();
+		// options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		// parser.setCompilerOptions(options);
+		// parser.setResolveBindings(true);
+		// parser.setBindingsRecovery(true);
+		//
+		// String tempClassPath = new File("").getAbsolutePath();
+		// String[] tempClassPathArray = { tempClassPath };
+		//
+		// parser.setEnvironment(tempClassPathArray, null, null, false);
+		// parser.setUnitName("temp.java");
+
+		// Adding bindings
+		// CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G8 visitor = new TypeVisitorI2G8();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.logDeclarations.get(type);
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.logReferences.get(type);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * ITERATION 2 GROUP 9 Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_9(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G9 visitor = new TypeVisitorI2G9();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.typeMap.get(type).get(1);
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.typeMap.get(type).get(0);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * Configures ASTParser and visitor for source file
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitor visitor = new TypeVisitor();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		try {
+			declarationCount = visitor.getDeclarations().get(type);
+		} catch (Exception e) {
+
+		}
+		try {
+			referenceCount = visitor.getReferences().get(type);
+		} catch (Exception e) {
+
+		}
+
+		assertEquals(expectedDeclarationCount, declarationCount);
+		assertEquals(expectedReferenceCount, referenceCount);
+
 	}
 }
