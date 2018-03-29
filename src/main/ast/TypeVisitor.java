@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,16 +36,8 @@ import main.util.Multiset;
  * source code, and count the number of declarations of references for each of
  * the java types present.
  *
- * TODO
- * Detect anonymous types
- * 	- Approach: Find MethodInvocation, or Constructor call? Constrain to only anonymous?
- * Detect local declarations (DONE)
- * 	- Just need to add test cases
- * Detect nested declarations
- * 	- Approach: Find parents of nodes recursively until either we reach the root (not nested) or 2 parents are of type class declaration (is nested)
- * 
  * @author Evan Quan
- * @version 3.1.0
+ * @version 3.2.0
  * @since 29 March 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -422,6 +415,19 @@ public class TypeVisitor extends ASTVisitor {
 		}
 		debug("\tAFTER APPEND:" + name);
 		return name;
+	}
+	
+	/**
+	 * Track anonymous class declarations
+	 * Note that this does not increment regular declaration count
+	 */
+	@Override
+	public boolean visit(AnonymousClassDeclaration node) {
+		ITypeBinding typeBind = node.resolveBinding();
+		String name = typeBind.getQualifiedName();
+		debug("AnonymousClassDeclaration", name);
+		incrementAnonymous(name);
+		return true;
 	}
 
 	/**

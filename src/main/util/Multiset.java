@@ -1,18 +1,19 @@
 package main.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Can contain multiple quantities of each element.
  * 
  * @author Evan Quan
- * @version 1.2.0
- * @since 28 March, 2018
+ * @version 1.3.0
+ * @since 29 March, 2018
  *
  * @param <E>
  *            type of element contained in multiset
  */
-public class Multiset<E> {
+public class Multiset<E> implements Iterable<E> {
 
 	private HashMap<E, Integer> elements;
 
@@ -128,5 +129,14 @@ public class Multiset<E> {
 			total += elements.get(element);
 		}
 		return total;
+	}
+	
+
+	/**
+	 * Allows multiset to be iterated over in a foreach loop
+	 */
+	@Override
+	public Iterator<E> iterator() {
+		return elements.keySet().iterator();
 	}
 }

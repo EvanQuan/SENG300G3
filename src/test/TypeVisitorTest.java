@@ -30,7 +30,7 @@ import main.file.FileManager;
 /**
  *
  * @author Evan Quan
- * @version 3.0.0
+ * @version 3.1.0
  * @since 29 March 2018
  *
  */
@@ -179,7 +179,8 @@ public abstract class TypeVisitorTest {
 		int declarationCount = visitor.getDeclarations().count(type);
 		int referenceCount = visitor.getReferences().count(type);
 
-		int anonymousCount = visitor.getAnonymous().count(type);
+		// Since anonymous class declarations don't have names, the only relevant thing to check is the total quantity of anonymous class declarations
+		int anonymousCount = visitor.getAnonymous().getElementCount();
 		int localCount = visitor.getLocal().count(type);
 		int nestedCount = visitor.getNested().count(type);
 
