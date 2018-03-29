@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -43,8 +44,8 @@ import main.util.Multiset;
  * 	- Approach: Find parents of nodes recursively until either we reach the root (not nested) or 2 parents are of type class declaration (is nested)
  * 
  * @author Evan Quan
- * @version 3.0.0
- * @since 25 March 2018
+ * @version 3.1.0
+ * @since 29 March 2018
  */
 public class TypeVisitor extends ASTVisitor {
 
@@ -360,7 +361,6 @@ public class TypeVisitor extends ASTVisitor {
 			debug("SimpleName", type);
 			debug("\tParent" + parentNodeName);
 			incrementReference(type);
-
 		}
 		return true;
 	}
@@ -573,14 +573,32 @@ public class TypeVisitor extends ASTVisitor {
 		// Local classes do not have qualified names, only simple names
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
-			debug("TypeDcelaration LOCAL", type);
+			debug("TypeDeclaration LOCAL", type);
 			incrementLocal(type);
 		} else {
-			debug("TypeDeclaration", type);
+
+			// Nested classes have at least 1 parent node as a TypeDeclaration
+			// TODO Can a type be both local and nested?
+			while (true) {
+				ASTNode parent = node.getParent();
+				Class<? extends ASTNode> parentNode = parent.getClass();
+				String parentNodeName = parentNode.getSimpleName();
+
+				debug("\tParent: " + parentNodeName);
+				
+				if (parentNode.equals(TypeDeclaration.class)) {
+					debug("TypeDeclaration NESTED", type);
+					incrementNested(type);
+					break;
+				} else if (parentNode.equals(CompilationUnit.class)) {
+					debug("TypeDeclaration", type);
+					break;
+				}
+			}
+			
 		}
 
 		incrementDeclaration(type);
-
 		return true;
 	}
 }

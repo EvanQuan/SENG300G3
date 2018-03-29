@@ -23,8 +23,8 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 1.1.0
- * @since March 18, 2018
+ * @version 3.1.0
+ * @since 29 March 2018
  *
  */
 public class TypeFinder {
@@ -161,7 +161,7 @@ public class TypeFinder {
 
 	/**
 	 * Sorts types and prints all types, and declaration and reference counts of
-	 * each type.
+	 * each type. Also prints the kind of declarations and their relative usage.
 	 */
 	public static void printDeclarationsAndReferences() {
 		ArrayList<String> types = visitor.getTypes();
@@ -173,6 +173,16 @@ public class TypeFinder {
 			System.out.println(
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}
+		
+		int totalDeclarationCount = visitor.getDeclarationCount();
+		int anonymousCount = visitor.getAnonymous().getElementCount();
+		int localCount = visitor.getLocal().getElementCount();
+		int nestedCount = visitor.getNested().getElementCount();
+		// Iteration 3
+		System.out.println("Total declarations found: " + totalDeclarationCount);
+		System.out.println("Anonymous declarations found: " + anonymousCount);
+		System.out.println("Local declarations found: " + localCount);
+		System.out.println("Nested declarations found: " + nestedCount);
 	}
 
 	/**
@@ -194,11 +204,8 @@ public class TypeFinder {
 		sourcePath = args[SOURCE_PATH];
 
 		// Get all all Java files from directory or jar file
-
 		try {
-
 			javaFiles = JavaRetriever.getJavaContents(sourcePath);
-
 		} catch (NotDirectoryException e) {
 			System.err.println(INVALID_PATH_ERROR_MESSAGE);
 		}

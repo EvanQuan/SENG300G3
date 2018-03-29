@@ -21,6 +21,7 @@ import main.ast.TypeVisitorI1G7;
 import main.ast.TypeVisitorI1G8;
 import main.ast.TypeVisitorI2G1;
 import main.ast.TypeVisitorI2G2;
+import main.ast.TypeVisitorI2G3;
 import main.ast.TypeVisitorI2G7;
 import main.ast.TypeVisitorI2G8;
 import main.ast.TypeVisitorI2G9;
@@ -29,8 +30,8 @@ import main.file.FileManager;
 /**
  *
  * @author Evan Quan
- * @version 2.1.0
- * @since 27 March 2018
+ * @version 3.0.0
+ * @since 29 March 2018
  *
  */
 public abstract class TypeVisitorTest {
@@ -49,6 +50,7 @@ public abstract class TypeVisitorTest {
 	// Iteration 2
 	public static final int I2G1 = 201; // 95:2:27
 	public static final int I2G2 = 202; // 124:0:0
+	public static final int I2G3 = 203; //
 	public static final int I2G4 = 204; // 96:0:27
 	public static final int I2G7 = 207; // 95:0:29
 	public static final int I2G8 = 208; // 89:0:35
@@ -85,8 +87,8 @@ public abstract class TypeVisitorTest {
 	}
 
 	/**
-	 * Determines which Visitor to use Accounts for to iteration 2 and below
-	 * requirements (setting anonymous, local and nested counts to 0)
+	 * Determines which Visitor to use. Accounts for to iteration 2 and below
+	 * requirements. If iteration 3 visitor, sets anonymous, local and nested counts to 0.
 	 *
 	 * @param source
 	 * @param type
@@ -118,6 +120,9 @@ public abstract class TypeVisitorTest {
 			break;
 		case I2G2:
 			configureParser_2_2(source, type, expectedDeclarationCount, expectedReferenceCount);
+			break;
+		case I2G3:
+			configureParser_2_3(source, type, expectedDeclarationCount, expectedReferenceCount);
 			break;
 		case I2G4:
 			configureParser_2_4(source, type, expectedDeclarationCount, expectedReferenceCount);
@@ -178,12 +183,12 @@ public abstract class TypeVisitorTest {
 		int localCount = visitor.getLocal().count(type);
 		int nestedCount = visitor.getNested().count(type);
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 		
-		assertEquals(expectedAnonymousCount, anonymousCount);
-		assertEquals(expectedLocalCount, localCount);
-		assertEquals(expectedNestedCount, nestedCount);
+		assertEquals("Anonymous count", expectedAnonymousCount, anonymousCount);
+		assertEquals("Local count", expectedLocalCount, localCount);
+		assertEquals("Nested count", expectedNestedCount, nestedCount);
 	}
 
 	/**
@@ -234,8 +239,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -287,8 +292,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Delcaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -339,8 +344,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, decl_count);
-		assertEquals(expectedReferenceCount, ref_count);
+		assertEquals("Declaration count", expectedDeclarationCount, decl_count);
+		assertEquals("Reference count", expectedReferenceCount, ref_count);
 
 	}
 
@@ -391,8 +396,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 	}
 
 	/**
@@ -442,8 +447,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, decl_count);
-		assertEquals(expectedReferenceCount, ref_count);
+		assertEquals("Declaration count", expectedDeclarationCount, decl_count);
+		assertEquals("Reference count", expectedReferenceCount, ref_count);
 
 	}
 
@@ -495,8 +500,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -548,8 +553,60 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
+
+	}
+
+	/**
+	 * Iteration 2 Group 3
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser_2_3(String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(source.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		// these are needed for binding to be resolved due to SOURCE is a char[]
+		String[] srcPath = { _TestSuite.SOURCE_DIR };
+		String[] classPath = { _TestSuite.BIN_DIR };
+		parser.setEnvironment(classPath, srcPath, null, true);
+		// parser.setEnvironment(null, null, null, true);
+		// TODO: Fix up the name to be something other than name?
+		parser.setUnitName("Name");
+
+		// ensures nodes are being parsed properly
+		Map<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		parser.setCompilerOptions(options);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		TypeVisitorI2G3 visitor = new TypeVisitorI2G3();
+		cu.accept(visitor);
+
+		int declarationCount = 0;
+		int referenceCount = 0;
+		
+		ArrayList<String> types = visitor.getFoundTypes();
+		
+		for (int i = 0; i < types.size(); i++) {
+			if (types.get(i).equals(type)) {
+				declarationCount += visitor.getDeclarationsArray().get(i);
+				referenceCount += visitor.getReferencesArray().get(i);
+			}
+		}
+
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -600,8 +657,8 @@ public abstract class TypeVisitorTest {
 			}
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaraction count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -653,8 +710,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -723,8 +780,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
@@ -776,8 +833,8 @@ public abstract class TypeVisitorTest {
 
 		}
 
-		assertEquals(expectedDeclarationCount, declarationCount);
-		assertEquals(expectedReferenceCount, referenceCount);
+		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
+		assertEquals("Reference count", expectedReferenceCount, referenceCount);
 
 	}
 
