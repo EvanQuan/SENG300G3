@@ -10,25 +10,23 @@ import org.junit.runners.Suite;
 /**
  * All Test suites go here.
  */
-// @Suite.SuiteClasses({ FileManagerTest.class, JavaFileTest.class,
-// JavaRetrieverTest.class, PassTest.class,
-// TypeFinderDirectoryTest.class, TypeFinderJarTest.class,
-// TypeVisitorAnonymousTest.class,
-// TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class,
-// TypeVisitorNestedTest.class, TypeVisitorFooTest.class,
-// TypeVisitorPrimitiveTest.class, TypeVisitorFooArrayTest.class,
-// TypeVisitorPackageFooTest.class })
+@Suite.SuiteClasses({ MultisetTest.class, FileManagerTest.class, JavaFileTest.class, JavaRetrieverTest.class,
+		PassTest.class, TypeFinderDirectoryTest.class, TypeFinderJarTest.class, TypeVisitorAnonymousTest.class,
+		TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class, TypeVisitorNestedTest.class, TypeVisitorFooTest.class,
+		TypeVisitorPrimitiveTest.class, TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
 
 // Just visitor
-@Suite.SuiteClasses({ TypeVisitorAnonymousTest.class, TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class,
-		TypeVisitorNestedTest.class, TypeVisitorFooTest.class, TypeVisitorPrimitiveTest.class,
-		TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
+// @Suite.SuiteClasses({ TypeVisitorAnonymousTest.class,
+// TypeVisitorBuiltInTest.class, TypeVisitorLocalTest.class,
+// TypeVisitorNestedTest.class, TypeVisitorFooTest.class,
+// TypeVisitorPrimitiveTest.class,
+// TypeVisitorFooArrayTest.class, TypeVisitorPackageFooTest.class })
 /**
  * Runs all test classes
  *
  * @author Evan Quan
- * @version 3.0.0
- * @since 28 March 2018
+ * @version 3.1.0
+ * @since 2 April 2018
  *
  */
 public class _TestSuite {

@@ -82,6 +82,18 @@ public class Multiset<E> implements Iterable<E> {
 		add(element, -count);
 	}
 
+	public void remove(Multiset<E> other) {
+		for (E element : other) {
+			remove(element, other.count(element));
+		}
+	}
+
+	public void add(Multiset<E> other) {
+		for (E element : other) {
+			add(element, other.count(element));
+		}
+	}
+
 	/**
 	 * Remove all elements from multiset
 	 * 
@@ -110,7 +122,7 @@ public class Multiset<E> implements Iterable<E> {
 	public boolean isEmpty() {
 		return elements.isEmpty();
 	}
-	
+
 	/**
 	 * 
 	 * @return the number of element types contained in this multiset
@@ -118,7 +130,7 @@ public class Multiset<E> implements Iterable<E> {
 	public int getTypeCount() {
 		return elements.size();
 	}
-	
+
 	/**
 	 * 
 	 * @return the total number of elements contained in this multiset
@@ -130,7 +142,6 @@ public class Multiset<E> implements Iterable<E> {
 		}
 		return total;
 	}
-	
 
 	/**
 	 * Allows multiset to be iterated over in a foreach loop
@@ -138,5 +149,15 @@ public class Multiset<E> implements Iterable<E> {
 	@Override
 	public Iterator<E> iterator() {
 		return elements.keySet().iterator();
+	}
+
+	/**
+	 * Return shallow copy of this multiset
+	 */
+	@Override
+	public Multiset<E> clone() {
+		Multiset<E> clone = new Multiset<E>();
+		clone.add(this);
+		return clone;
 	}
 }

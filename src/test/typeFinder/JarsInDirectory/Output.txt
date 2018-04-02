@@ -6,3 +6,7 @@ D.E. Declarations found: 2; references found: 4.
 H. Declarations found: 2; references found: 0.
 foo.E. Declarations found: 2; references found: 8.
 int. Declarations found: 0; references found: 2.
+Total declarations found: 14
+Anonymous declarations found: 0
+Local declarations found: 0
+Nested declarations found: 2

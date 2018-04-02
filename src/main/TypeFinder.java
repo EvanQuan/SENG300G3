@@ -11,8 +11,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import main.ast.TypeVisitor;
-import main.file.ClassFile;
-import main.file.File;
 import main.file.JavaFile;
 import main.file.JavaRetriever;
 
@@ -23,8 +21,8 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.1.0
- * @since 29 March 2018
+ * @version 3.1.1
+ * @since 2 April 2018
  *
  */
 public class TypeFinder {
@@ -87,51 +85,6 @@ public class TypeFinder {
 	}
 
 	/**
-	 * NOTE: Unused currently. May be used for iteration 3.
-	 * 
-	 * @param file
-	 *            to set as source
-	 * @return ASTParser configured to parse CompilationUnits for JLS8
-	 */
-	private static ASTParser getConfiguredASTParser(ClassFile file) {
-		// TODO
-		// 2. How to get the ASTParser to accept a .class file
-		// - Turn the contents of a .class file into a IClassFile/ICompilationUnit
-		// - Something that may involve IFile, File class?
-
-		// .class -> File
-		// File classFile = new File("class path??");
-		//
-		// File -> IFile
-		// https://stackoverflow.com/questions/960746/how-to-convert-from-file-to-ifile-in-java-for-files-outside-the-project
-		// http://exploreeclipse.blogspot.ca/2014/08/converting-java-io-file-to-eclipse.html
-		// https://stackoverflow.com/questions/17421590/iterate-over-folders-in-jar-file-directly
-		// <--- THIS
-		//
-		// IFile -> IClassFile
-		// IClassFile ifile = JavaCore.createClassFileFrom(IFile file)
-		// https://help.eclipse.org/luna/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FJavaCore.html
-		//
-		// Figure out what to set as source.
-		// IClassFile?
-		// What about other settings? Are they the same?
-		// setKind still CompilationUnit?
-
-		return null;
-	}
-
-	/**
-	 * This method is overridden by JavaFile and ClassFile implementations
-	 * 
-	 * @param file
-	 *            to set as source
-	 * @return ASTParser configured to parse CompilationUnits for JLS8
-	 */
-	private static ASTParser getConfiguredASTParser(File file) {
-		throw new IllegalArgumentException();
-	}
-
-	/**
 	 *
 	 * @param file
 	 *            to set as source
@@ -173,7 +126,7 @@ public class TypeFinder {
 			System.out.println(
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}
-		
+
 		int totalDeclarationCount = visitor.getDeclarationCount();
 		int anonymousCount = visitor.getAnonymous().getElementCount();
 		int localCount = visitor.getLocal().getElementCount();
@@ -208,6 +161,7 @@ public class TypeFinder {
 			javaFiles = JavaRetriever.getJavaContents(sourcePath);
 		} catch (NotDirectoryException e) {
 			System.err.println(INVALID_PATH_ERROR_MESSAGE);
+			return false;
 		}
 
 		return true;

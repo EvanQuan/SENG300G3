@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -223,7 +222,7 @@ public class TypeVisitor extends ASTVisitor {
 		// Imported names accumulate within a file, but not between files
 		importedNames.clear();
 	}
-	
+
 	/**
 	 * @return the total number of declarations made
 	 */
@@ -292,16 +291,16 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	// TODO what is this for? Example of QualifiedType
-	@Override
-	public boolean visit(QualifiedType node) {
-		ITypeBinding typeBind = node.resolveBinding();
-		String type = typeBind.getQualifiedName();
-
-		debug("QualifiedType", type);
-		incrementReference(type);
-
-		return true;
-	}
+	// @Override
+	// public boolean visit(QualifiedType node) {
+	// ITypeBinding typeBind = node.resolveBinding();
+	// String type = typeBind.getQualifiedName();
+	//
+	// debug("QualifiedType", type);
+	// incrementReference(type);
+	//
+	// return true;
+	// }
 
 	/**
 	 * Used to detect static field calls. type: Class.field qualifier: Class
@@ -416,10 +415,10 @@ public class TypeVisitor extends ASTVisitor {
 		debug("\tAFTER APPEND:" + name);
 		return name;
 	}
-	
+
 	/**
-	 * Track anonymous class declarations
-	 * Note that this does not increment regular declaration count
+	 * Track anonymous class declarations Note that this does not increment regular
+	 * declaration count
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
@@ -591,7 +590,7 @@ public class TypeVisitor extends ASTVisitor {
 				String parentNodeName = parentNode.getSimpleName();
 
 				debug("\tParent: " + parentNodeName);
-				
+
 				if (parentNode.equals(TypeDeclaration.class)) {
 					debug("TypeDeclaration NESTED", type);
 					incrementNested(type);
@@ -601,7 +600,7 @@ public class TypeVisitor extends ASTVisitor {
 					break;
 				}
 			}
-			
+
 		}
 
 		incrementDeclaration(type);
