@@ -14,6 +14,11 @@ Table of Contents
     - [Check before pushing](#check-before-pushing)
 5. [Contact](#contact)
 
+The Real Git Flow
+-------------------------
+[<img src="https://i.redd.it/dsdbmyoirso01.jpg">]
+
+
 Getting Started
 ---------------
 
