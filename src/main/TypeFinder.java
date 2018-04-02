@@ -21,7 +21,7 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.1.1
+ * @version 3.1.2
  * @since 2 April 2018
  *
  */
@@ -128,9 +128,9 @@ public class TypeFinder {
 		}
 
 		int totalDeclarationCount = visitor.getDeclarationCount();
-		int anonymousCount = visitor.getAnonymous().getElementCount();
-		int localCount = visitor.getLocal().getElementCount();
-		int nestedCount = visitor.getNested().getElementCount();
+		int anonymousCount = visitor.getAnonymousDeclarations().getElementCount();
+		int localCount = visitor.getLocalDeclarations().getElementCount();
+		int nestedCount = visitor.getNestedDeclarations().getElementCount();
 		// Iteration 3
 		System.out.println("Total declarations found: " + totalDeclarationCount);
 		System.out.println("Anonymous declarations found: " + anonymousCount);

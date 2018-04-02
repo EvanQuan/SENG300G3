@@ -34,20 +34,27 @@ import main.util.Multiset;
  * type T, the visitor will locate the different java types present in the
  * source code, and count the number of declarations of references for each of
  * the java types present.
+ * 
+ * @TODO Track local and nested references.
  *
  * @author Evan Quan
- * @version 3.2.0
- * @since 29 March 2018
+ * @version 3.3.0
+ * @since 2 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
 
 	private boolean debug;
 	private ArrayList<String> types;
+	// Declarations
 	private Multiset<String> declarations;
-	private Multiset<String> anonymous;
-	private Multiset<String> local;
-	private Multiset<String> nested;
+	private Multiset<String> anonymousDeclarations;
+	private Multiset<String> localDeclarations;
+	private Multiset<String> nestedDeclarations;
+	// References
 	private Multiset<String> references;
+	private Multiset<String> localReferences;
+	private Multiset<String> nestedReferences;
+
 	private String packageName;
 	private ArrayList<String> importedNames;
 
@@ -82,8 +89,8 @@ public class TypeVisitor extends ASTVisitor {
 	 * 
 	 * @param type
 	 */
-	private void incrementAnonymous(String type) {
-		anonymous.add(type);
+	private void incrementAnonymousDeclaration(String type) {
+		anonymousDeclarations.add(type);
 	}
 
 	/**
@@ -91,9 +98,9 @@ public class TypeVisitor extends ASTVisitor {
 	 * 
 	 * @param type
 	 */
-	private void incrementLocal(String type) {
+	private void incrementLocalDeclaration(String type) {
 		addTypeToList(type);
-		local.add(type);
+		localDeclarations.add(type);
 	}
 
 	/**
@@ -101,9 +108,9 @@ public class TypeVisitor extends ASTVisitor {
 	 * 
 	 * @param type
 	 */
-	private void incrementNested(String type) {
+	private void incrementNestedDeclaration(String type) {
 		addTypeToList(type);
-		nested.add(type);
+		nestedDeclarations.add(type);
 	}
 
 	/**
@@ -116,6 +123,26 @@ public class TypeVisitor extends ASTVisitor {
 		// Check if the type exists, then increment their associated value by 1
 		addTypeToList(type);
 		references.add(type);
+	}
+
+	/**
+	 * Increment the local reference count for a given type
+	 * 
+	 * @param type
+	 */
+	private void incrementLocalReference(String type) {
+		addTypeToList(type);
+		localReferences.add(type);
+	}
+
+	/**
+	 * Increment the nested reference count for a given type
+	 * 
+	 * @param type
+	 */
+	private void incrementNestedReference(String type) {
+		addTypeToList(type);
+		nestedReferences.add(type);
 	}
 
 	/*
@@ -153,15 +180,17 @@ public class TypeVisitor extends ASTVisitor {
 		this.debug = debug;
 		this.types = new ArrayList<String>();
 		this.declarations = new Multiset<String>();
-		this.anonymous = new Multiset<String>();
-		this.local = new Multiset<String>();
-		this.nested = new Multiset<String>();
+		this.anonymousDeclarations = new Multiset<String>();
+		this.localDeclarations = new Multiset<String>();
+		this.nestedDeclarations = new Multiset<String>();
 		this.references = new Multiset<String>();
+		this.localReferences = new Multiset<String>();
+		this.nestedReferences = new Multiset<String>();
 		this.importedNames = new ArrayList<String>();
 	}
 
 	/**
-	 * Get count of all declarations found.
+	 * Get all declarations found.
 	 *
 	 * @return declarations
 	 */
@@ -170,21 +199,21 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Get count of all anonymous declarations found.
+	 * Get all anonymous declarations found.
 	 *
 	 * @return declarations
 	 */
-	public Multiset<String> getAnonymous() {
-		return anonymous;
+	public Multiset<String> getAnonymousDeclarations() {
+		return anonymousDeclarations;
 	}
 
 	/**
-	 * Get count of all local declarations found.
+	 * Get all local declarations found.
 	 *
 	 * @return declarations
 	 */
-	public Multiset<String> getLocal() {
-		return local;
+	public Multiset<String> getLocalDeclarations() {
+		return localDeclarations;
 	}
 
 	/**
@@ -192,8 +221,8 @@ public class TypeVisitor extends ASTVisitor {
 	 *
 	 * @return declarations
 	 */
-	public Multiset<String> getNested() {
-		return nested;
+	public Multiset<String> getNestedDeclarations() {
+		return nestedDeclarations;
 	}
 
 	/**
@@ -206,12 +235,30 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Get count of all references found.
+	 * Get all references found.
 	 *
 	 * @return references
 	 */
 	public Multiset<String> getReferences() {
 		return references;
+	}
+
+	/**
+	 * Get local references found
+	 * 
+	 * @return
+	 */
+	public Multiset<String> getLocalReferences() {
+		return localReferences;
+	}
+
+	/**
+	 * Get all nested references found
+	 * 
+	 * @return
+	 */
+	public Multiset<String> getNestedReferences() {
+		return nestedReferences;
 	}
 
 	/**
@@ -227,7 +274,7 @@ public class TypeVisitor extends ASTVisitor {
 	 * @return the total number of declarations made
 	 */
 	public int getDeclarationCount() {
-		return declarations.getElementCount() + anonymous.getElementCount();
+		return declarations.getElementCount() + anonymousDeclarations.getElementCount();
 	}
 
 	/*
@@ -425,7 +472,7 @@ public class TypeVisitor extends ASTVisitor {
 		ITypeBinding typeBind = node.resolveBinding();
 		String name = typeBind.getQualifiedName();
 		debug("AnonymousClassDeclaration", name);
-		incrementAnonymous(name);
+		incrementAnonymousDeclaration(name);
 		return true;
 	}
 
@@ -579,7 +626,7 @@ public class TypeVisitor extends ASTVisitor {
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
 			debug("TypeDeclaration LOCAL", type);
-			incrementLocal(type);
+			incrementLocalDeclaration(type);
 		} else {
 
 			// Nested classes have at least 1 parent node as a TypeDeclaration
@@ -593,7 +640,7 @@ public class TypeVisitor extends ASTVisitor {
 
 				if (parentNode.equals(TypeDeclaration.class)) {
 					debug("TypeDeclaration NESTED", type);
-					incrementNested(type);
+					incrementNestedDeclaration(type);
 					break;
 				} else if (parentNode.equals(CompilationUnit.class)) {
 					debug("TypeDeclaration", type);
