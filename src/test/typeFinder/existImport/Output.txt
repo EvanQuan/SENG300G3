@@ -1,0 +1,11 @@
+test.typeFinder.existImport.FooExist. Declarations found: 1; references found: 0.
+test.typeFinder.existImport.FooNotExist. Declarations found: 1; references found: 0.
+test.typeFinder.importFromMe.ImportMe. Declarations found: 0; references found: 2.
+test.typeFinder.importFromMe.ImportNotExist. Declarations found: 0; references found: 2.
+Total declarations found: 2
+Anonymous declarations found: 0
+Local declarations found: 0
+Nested declarations found: 0
+Total references found: 4
+Local references found: 0
+Nested references found: 0

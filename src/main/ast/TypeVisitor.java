@@ -1,5 +1,6 @@
 package main.ast;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import main.util.Multiset;
  * type T, the visitor will locate the different java types present in the
  * source code, and count the number of declarations of references for each of
  * the java types present.
- * 
+ *
  * It also tracks where declarations are anonymous, local, or nested, and if
  * references are local or nested.
  *
@@ -46,7 +47,10 @@ import main.util.Multiset;
  */
 public class TypeVisitor extends ASTVisitor {
 
+	// Debug
 	private boolean debug;
+	private PrintStream out = System.out;
+
 	private ArrayList<String> types;
 	// Declarations
 	private Multiset<String> namedDeclarations;
@@ -66,13 +70,14 @@ public class TypeVisitor extends ASTVisitor {
 	 * counters to null.
 	 */
 	public TypeVisitor() {
-		this(false); // Debug is false
+		this(false);
 	}
 
 	/**
 	 * Debug constructor.
 	 *
-	 * @param debug
+	 * @param debugPrintStream.
+	 *            The visitor prints to its own PrintStream
 	 */
 	public TypeVisitor(boolean debug) {
 		this.debug = debug;
@@ -125,13 +130,13 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	private void debug(Object message) {
 		if (debug) {
-			System.out.println(message);
+			out.println(message);
 		}
 	}
 
 	private void debug(Object node, Object type) {
 		if (debug) {
-			System.out.println("Node: " + node + " | Type: " + type);
+			out.println("Node: " + node + " | Type: " + type);
 		}
 	}
 	/*
@@ -156,15 +161,6 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Get all named declarations found.
-	 *
-	 * @return declarations
-	 */
-	public Multiset<String> getNamedDeclarations() {
-		return namedDeclarations;
-	}
-
-	/**
 	 * Get all local declarations found.
 	 *
 	 * @return declarations
@@ -180,6 +176,15 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	public Multiset<String> getLocalReferences() {
 		return localReferences;
+	}
+
+	/**
+	 * Get all named declarations found.
+	 *
+	 * @return declarations
+	 */
+	public Multiset<String> getNamedDeclarations() {
+		return namedDeclarations;
 	}
 
 	/**

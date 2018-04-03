@@ -1,0 +1,11 @@
+test.typeFinder.wildcardImport.FooExist. Declarations found: 1; references found: 0.
+test.typeFinder.wildcardImport.FooNotExist. Declarations found: 1; references found: 0.
+test.typeFinder.importFromMe.ImportMe. Declarations found: 0; references found: 1.
+test.typeFinder.wildcardImport.ImportNotExist. Declarations found: 0; references found: 1.
+Total declarations found: 2
+Anonymous declarations found: 0
+Local declarations found: 0
+Nested declarations found: 0
+Total references found: 2
+Local references found: 0
+Nested references found: 0

@@ -3,6 +3,7 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -14,39 +15,11 @@ import main.file.FileManager;
  * JUnit 4 Tests for {@link TypeFinder} class
  *
  * @author Evan Quan
- * @version 2.0.0
- * @since 25 March 2018
+ * @version 3.0.0
+ * @since 2 April 2018
  *
  */
 public class TypeFinderDirectoryTest extends TypeFinderTest {
-	
-
-	/**
-	 * Check that inputting an invalid directory prompts the user with an invalid
-	 * path error message to screen
-	 */
-	@Test
-	public void testInvalidDirectory() {
-		String invalidDirectory = "";
-		String[] args = { invalidDirectory };
-		TypeFinder.main(args);
-		String expected = TypeFinder.INVALID_PATH_ERROR_MESSAGE + FileManager.lineSeparator;
-		String results = errContent.toString();
-		assertEquals(expected, results);
-	}
-	
-	/**
-	 * Check that inputting an invalid jar prompts the user with an invalid  path error message to screen
-	 */
-	@Test
-	public void testInvalidJar() {
-		String invalidJar = _TestSuite.TYPE_FINDER_TEST_DIR.concat("jarThatDoesNotExist.jar");
-		String[] args = { invalidJar };
-		TypeFinder.main(args);
-		String expected = TypeFinder.INVALID_PATH_ERROR_MESSAGE + FileManager.lineSeparator;
-		String results = errContent.toString();
-		assertEquals(expected, results);
-	}
 
 	/**
 	 * Check that inputting no command line arguments returns a prompt to the user
@@ -75,15 +48,16 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	}
 
 	/**
-	 * Check that the correct number of declarations and references can be found
-	 * from SENG300W18Iter1 files
+	 * Check that whether a file that is being imported exists does NOT determine
+	 * whether the local reference refers to the imported class or a class of the
+	 * same directory.
 	 */
 	@Test
-	public void test_Directory_typeFinder_SENG300W18Iter1() {
-		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("SENG300W18Iter1/");
+	public void test_Directory_typeFinder_existImport() {
+		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("existImport/");
 		testOutput(directory);
 	}
-	
+
 	/**
 	 * Check that .jars within directories can be checked recursively
 	 */
@@ -92,16 +66,68 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("JarsInDirectory/");
 		testOutput(directory);
 	}
-	
+
 	/**
-	 * Tests that TypeFinder finds and output the correct declaration and reference counts of the given input path.
-	 * Assumes that path exists and is valid.
-	 * Output is checked with Output.txt file in the input directory.
-	 * @param path of directory or .jar
-	 * @throws IOException if path is invalid
+	 * Check that the correct number of declarations and references can be found
+	 * from SENG300W18Iter1 files
+	 */
+	@Test
+	public void test_Directory_typeFinder_SENG300W18Iter1() {
+		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("SENG300W18Iter1/");
+		testOutput(directory);
+	}
+
+	/**
+	 * Check that whether a file that is being imported via wildcard (*) exists
+	 * determines whether the local reference refers to the imported class or a
+	 * class of the same directory
+	 */
+	@Test
+	public void test_Directory_typeFinder_wildcardImport() {
+		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("wildcardImport/");
+		testOutput(directory);
+	}
+
+	/**
+	 * Check that inputting an invalid directory prompts the user with an invalid
+	 * path error message to screen
+	 */
+	@Test
+	public void testInvalidDirectory() {
+		String invalidDirectory = "";
+		String[] args = { invalidDirectory, "debug" };
+		TypeFinder.main(args);
+		String expected = TypeFinder.INVALID_PATH_ERROR_MESSAGE + FileManager.lineSeparator;
+		String results = errContent.toString();
+		assertEquals(expected, results);
+	}
+
+	/**
+	 * Check that inputting an invalid jar prompts the user with an invalid path
+	 * error message to screen
+	 */
+	@Test
+	public void testInvalidJar() {
+		String invalidJar = _TestSuite.TYPE_FINDER_TEST_DIR.concat("jarThatDoesNotExist.jar");
+		String[] args = { invalidJar };
+		TypeFinder.main(args);
+		String expected = TypeFinder.INVALID_PATH_ERROR_MESSAGE + FileManager.lineSeparator;
+		String results = errContent.toString();
+		assertEquals(expected, results);
+	}
+
+	/**
+	 * Tests that TypeFinder finds and output the correct declaration and reference
+	 * counts of the given input path. Assumes that path exists and is valid. Output
+	 * is checked with Output.txt file in the input directory.
+	 *
+	 * @param path
+	 *            of directory or .jar
+	 * @throws IOException
+	 *             if path is invalid
 	 */
 	public void testOutput(String path) {
-		String[] args = {path};
+		String[] args = { path };
 		TypeFinder.main(args);
 		String expectedErr = "";
 		// Check that there is no error
@@ -113,8 +139,13 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 			expectedOut = FileManager.getFileContents(path.concat(OUTPUT_FILE));
 			String actualOut = outContent.toString();
 			assertEquals(expectedOut, actualOut);
+		} catch (FileNotFoundException e) {
+			fail("Output.txt cannot be found at " + path);
 		} catch (IOException e) {
-			fail("Invalid path");
+			System.setOut(out);
+			System.setErr(err);
+			e.printStackTrace();
+			fail("You dun goofed.");
 		}
 	}
 }

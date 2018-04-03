@@ -15,6 +15,8 @@ import org.junit.Before;
 public class TypeFinderTest {
 
 	protected static String OUTPUT_FILE = "Output.txt";
+	protected static PrintStream out = System.out;
+	protected static PrintStream err = System.err;
 	/**
 	 * Contents of standard output
 	 */
@@ -26,8 +28,8 @@ public class TypeFinderTest {
 	 */
 	@After
 	public void restoreStream() {
-		System.setOut(System.out);
-		System.setErr(System.err);
+		System.setOut(out);
+		System.setErr(err);
 	}
 
 	/**

@@ -37,6 +37,16 @@ public class TypeFinder {
 	 */
 	public static final int VALID_ARGUMENT_COUNT = 1;
 	/**
+	 * The program will normally throw an error if the argument count is over
+	 * VALID_ARGUMENT_COUNT, but a debug argument 1 over the valid argument count is
+	 * allowed
+	 */
+	private static final int DEBUG_ARGUMENT_COUNT = VALID_ARGUMENT_COUNT + 1;
+	/**
+	 * Index of debug argument
+	 */
+	private static final int DEBUG_ARGUMENT = VALID_ARGUMENT_COUNT;
+	/**
 	 * Error message when the user inputs a directory or jar file that TypeFinder
 	 * cannot recognize. This may be because the directory or jar file does not
 	 * exist, or is not accessible.
@@ -59,6 +69,10 @@ public class TypeFinder {
 	public static final String INVALID_ARGUMENT_ERROR_MESSAGE = "Error: Invalid number of arguments.\n" + USAGE_MESSAGE;
 
 	private static String sourcePath;
+	/**
+	 * Debug alters how the TypeVisitor is set up
+	 */
+	private static boolean debug;
 
 	private static ArrayList<JavaFile> javaFiles;
 	private static TypeVisitor visitor;
@@ -70,7 +84,7 @@ public class TypeFinder {
 	private static TypeVisitor findDeclarationsAndReferences() {
 		// Initialize visitor once, so types, declarations, and references accumulate
 		// over all files
-		visitor = new TypeVisitor();
+		visitor = new TypeVisitor(debug);
 
 		// For every file iterated through, types, declarations, and references are
 		// updated.
@@ -110,6 +124,27 @@ public class TypeFinder {
 
 		parser.setSource(file.getContents().toCharArray());
 		return parser;
+	}
+
+	/**
+	 * Initiates the program
+	 *
+	 * @param args
+	 *            command line arguments args[0] path of directory/jar file of
+	 *            interest
+	 */
+	public static void main(String[] args) {
+		// Check if user input is valid and set up
+		boolean validInput = processInput(args);
+		if (!validInput) {
+			return; // End program
+		}
+
+		// Find declaration and reference counts of java files
+		findDeclarationsAndReferences();
+
+		// Final output
+		printDeclarationsAndReferences();
 	}
 
 	/**
@@ -156,10 +191,17 @@ public class TypeFinder {
 	 */
 	private static boolean processInput(String[] args) {
 
+		// Default debug is off
+		debug = false;
 		// Check if user has inputed a valid number arguments.
 		if (args.length != VALID_ARGUMENT_COUNT) {
-			System.err.println(INVALID_ARGUMENT_ERROR_MESSAGE);
-			return false;
+			// Check for debug mode
+			if (args.length == DEBUG_ARGUMENT_COUNT && args[DEBUG_ARGUMENT].equals("debug")) {
+				debug = true;
+			} else {
+				System.err.println(INVALID_ARGUMENT_ERROR_MESSAGE);
+				return false;
+			}
 		}
 
 		// Get input from command line arguments
@@ -174,26 +216,5 @@ public class TypeFinder {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Initiates the program
-	 *
-	 * @param args
-	 *            command line arguments args[0] path of directory/jar file of
-	 *            interest
-	 */
-	public static void main(String[] args) {
-		// Check if user input is valid and set up
-		boolean validInput = processInput(args);
-		if (!validInput) {
-			return; // End program
-		}
-
-		// Find declaration and reference counts of java files
-		findDeclarationsAndReferences();
-
-		// Final output
-		printDeclarationsAndReferences();
 	}
 }
