@@ -21,8 +21,8 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.1.2
- * @since 2 April 2018
+ * @version 3.2.0
+ * @since 3 April 2018
  *
  */
 public class TypeFinder {
@@ -127,15 +127,24 @@ public class TypeFinder {
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}
 
-		int totalDeclarationCount = visitor.getDeclarationCount();
-		int anonymousCount = visitor.getAnonymousDeclarations().getElementCount();
-		int localCount = visitor.getLocalDeclarations().getElementCount();
-		int nestedCount = visitor.getNestedDeclarations().getElementCount();
+		int totalDeclarations = visitor.getDeclarationCount();
+		int anonymousDeclarations = visitor.getAnonymousDeclarations().getElementCount();
+		int localDeclarations = visitor.getLocalDeclarations().getElementCount();
+		int nestedDeclarations = visitor.getNestedDeclarations().getElementCount();
+
+		int totalReferences = visitor.getReferences().getElementCount();
+		int localReferences = visitor.getLocalReferences().getElementCount();
+		int nestedReferences = visitor.getNestedReferences().getElementCount();
+
 		// Iteration 3
-		System.out.println("Total declarations found: " + totalDeclarationCount);
-		System.out.println("Anonymous declarations found: " + anonymousCount);
-		System.out.println("Local declarations found: " + localCount);
-		System.out.println("Nested declarations found: " + nestedCount);
+		System.out.println("Total declarations found: " + totalDeclarations);
+		System.out.println("Anonymous declarations found: " + anonymousDeclarations);
+		System.out.println("Local declarations found: " + localDeclarations);
+		System.out.println("Nested declarations found: " + nestedDeclarations);
+		System.out.println("Total references found: " + totalReferences);
+		System.out.println("Local references found: " + localReferences);
+		System.out.println("Nested references found: " + nestedReferences);
+
 	}
 
 	/**
@@ -172,8 +181,7 @@ public class TypeFinder {
 	 *
 	 * @param args
 	 *            command line arguments args[0] path of directory/jar file of
-	 *            interest args[1] fully qualified name of Java type to search for
-	 *            declarations and references
+	 *            interest
 	 */
 	public static void main(String[] args) {
 		// Check if user input is valid and set up

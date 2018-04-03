@@ -10,3 +10,6 @@ Total declarations found: 14
 Anonymous declarations found: 0
 Local declarations found: 0
 Nested declarations found: 2
+Total references found: 42
+Local references found: 0
+Nested references found: 4
