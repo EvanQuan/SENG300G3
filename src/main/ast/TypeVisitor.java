@@ -38,8 +38,8 @@ import main.util.Multiset;
  * @TODO Track local and nested references.
  *
  * @author Evan Quan
- * @version 3.4.0
- * @since 2 April 2018
+ * @version 3.5.0
+ * @since 3 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
 
@@ -338,11 +338,12 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override // SAME
 	public boolean visit(AnnotationTypeDeclaration node) {
+		debug("===AnnotationTypeDeclaration===");
 		ITypeBinding typeBind = node.resolveBinding();
-		String type = typeBind.getQualifiedName();
+		String nameQualified = typeBind.getQualifiedName();
 
-		debug("AnnotationTypeDeclaration", type);
-		incrementDeclaration(type);
+		debug("\tAdded: ", nameQualified);
+		incrementDeclaration(nameQualified);
 
 		return true;
 	}
@@ -353,10 +354,11 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
+		debug("===AnonymousDeclassDeclaration===");
 		ITypeBinding typeBind = node.resolveBinding();
-		String name = typeBind.getQualifiedName();
-		debug("AnonymousClassDeclaration", name);
-		incrementAnonymousDeclaration(name);
+		String namedQualified = typeBind.getQualifiedName();
+		debug("\tAdded QualifiedName of parent: " + namedQualified);
+		incrementAnonymousDeclaration(namedQualified);
 		return true;
 	}
 
@@ -559,22 +561,37 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Detects static method calls
+	 * Detects static method calls. Rejects normal method calls.
 	 */
 	@Override
 	public boolean visit(SimpleName node) {
-		ASTNode parent = node.getParent();
-		Class<? extends ASTNode> parentNode = parent.getClass();
-		String parentNodeName = parentNode.getSimpleName();
+		debug("===SimpleName===");
+		String nameQualified = node.getFullyQualifiedName();
+		// Determine if the name is a class or method name
+		// Class if static method call
+		// else method name
+		ITypeBinding binding = node.resolveTypeBinding();
+		if (binding != null) {
+			if (binding.isClass()) {
+				ASTNode parent = node.getParent();
+				Class<? extends ASTNode> parentNode = parent.getClass();
+				String parentNodeName = parentNode.getSimpleName();
 
-		// Check parent for staticMethod
-		// MethodInvocation means staticMethod is called
-		if (parentNode.equals(MethodInvocation.class)) {
-			String type = node.getFullyQualifiedName();
-			type = appendPackageName(type);
-			debug("SimpleName", type);
-			debug("\tParent" + parentNodeName);
-			incrementReference(type);
+				// Check parent for staticMethod
+				// MethodInvocation means staticMethod is called
+				if (parentNode.equals(MethodInvocation.class)) {
+					nameQualified = appendPackageName(nameQualified);
+					debug("\tParent " + parentNodeName);
+					debug("\tAdded nameQualified: " + nameQualified);
+					incrementReference(nameQualified);
+				} else {
+					debug("\tNot added. " + nameQualified + " is not a method call. (Rejected to not double count).");
+				}
+			} else {
+				debug("\tNot added. " + nameQualified + " is a method declaration.");
+			}
+		} else {
+			debug("\tNot added. " + nameQualified + " is not a static method call.");
 		}
 		return true;
 

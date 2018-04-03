@@ -12,10 +12,25 @@ import org.junit.Test;
  */
 public class TypeVisitorMetaTest extends TypeVisitorTest {
 
+	/**
+	 * Check that anonymous class declarations can be tracked inside anonymous class
+	 * declarations. Since anonymous class declarations are tracked by parent
+	 * constructor, two anonymous class declarations that share the same parent are
+	 * counted as the "same" declaration (so multiple of the same count)
+	 */
+	// @Test
+	// public void
+	// test_ClassDeclarationAnonymousInAnonymousClassDeclaration_Dec_0_AnonDec_2_LocalDec_0_NestedDec_0_Ref_4_LocalRef_0_NestedDec_0()
+	// {
+	// configureParser("package bar; public class Other { Foo foo; public void
+	// method() {foo = new Foo() {} } }",
+	// "bar.Foo", 0, 2, 0, 0, 4, 0, 0);
+	// }
+
 	@Test
-	public void test_NestedReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_2_AnonRef_0_LocalRef_0_NestedRef_2() {
+	public void test_ClassDeclarationAnonymousInMethod_Dec_0_Ref_1_Anon_1_Local_0_Nested_0() {
 		configureParser(
-				"package bar; public class Other { public class Foo {} public void method() { Foo[] foo = new Foo[1]; } }",
-				"bar.Other.Foo[]", 0, 0, 0, 0, 2, 0, 2);
+				"public class Other { public void method() { Bar bar = new Bar(); bar.accept(new Foo() {public void fooMethod(){}} ); } } ",
+				"Foo", 0, 1, 1, 0, 0);
 	}
 }

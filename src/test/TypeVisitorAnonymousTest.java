@@ -7,8 +7,8 @@ import org.junit.Test;
  * reference counts for anonymous declarations.
  *
  * @author Evan Quan
- * @version 3.0.0
- * @since 28 March 2018
+ * @version 3.1.0
+ * @since 3 April 2018
  *
  */
 public class TypeVisitorAnonymousTest extends TypeVisitorTest {
@@ -53,5 +53,11 @@ public class TypeVisitorAnonymousTest extends TypeVisitorTest {
 		configureParser(
 				"package bar; public class Other { public void method() { Bar bar = new Bar(); bar.accept(new Foo() {public void fooMethod(){}} ); } } ",
 				"bar.Foo", 0, 1, 1, 0, 0);
+	}
+
+	@Test
+	public void test_ClassDeclarationAnonymousInAnonymousClassDeclaration_Dec_0_AnonDec_2_LocalDec_0_NestedDec_0_Ref_0_LocalRef_0_NestedDec_0() {
+		configureParser("package bar; public class Other { Foo foo = new Foo() { Foo foo = new Foo() {} } }", "Foo", 0,
+				2, 0, 0, 0, 0, 0);
 	}
 }

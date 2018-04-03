@@ -7,8 +7,8 @@ import org.junit.Test;
  * reference counts for local declarations.
  *
  * @author Evan Quan
- * @version 3.2.0
- * @since 2 April 2018
+ * @version 3.3.0
+ * @since 3 April 2018
  *
  */
 public class TypeVisitorLocalTest extends TypeVisitorTest {
@@ -76,7 +76,7 @@ public class TypeVisitorLocalTest extends TypeVisitorTest {
 	 * Check that instantiating an instance of local Foo counts for local references
 	 */
 	@Test
-	public void test_LocalReferenceArray_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
+	public void test_LocalReferenceArray_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_2_LocalRef_2_NestedRef_0() {
 		configureParser(
 				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[1]; } }",
 				"Foo", 1, 0, 1, 0, 2, 2, 0);
@@ -86,7 +86,7 @@ public class TypeVisitorLocalTest extends TypeVisitorTest {
 	 * Check that instantiating an instance of local Foo counts for local references
 	 */
 	@Test
-	public void test_LocalReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
+	public void test_LocalReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_2_LocalRef_2_NestedRef_0() {
 		configureParser(
 				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[1]; } }",
 				"Foo[]", 0, 0, 0, 0, 2, 2, 0);
@@ -96,19 +96,41 @@ public class TypeVisitorLocalTest extends TypeVisitorTest {
 	 * Check that instantiating an instance of local Foo counts for local references
 	 */
 	@Test
-	public void test_LocalReferenceConstructor_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
+	public void test_LocalReferenceConstructor_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_2_LocalRef_2_NestedRef_0() {
 		configureParser("package bar; public class Other { public void method() { class Foo{} Foo foo = new Foo(); } }",
 				"Foo", 1, 0, 1, 0, 2, 2, 0);
 	}
 
 	/**
-	 * Check that referencing local Foo in generic paramters counts for local
+	 * Check that referencing local Foo in generic parameters counts for local
 	 * references
 	 */
 	@Test
-	public void test_LocalReferenceInGeneric_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
+	public void test_LocalReferenceInGeneric_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_2_LocalRef_2_NestedRef_0() {
 		configureParser(
 				"package bar; public class Other { public void method() { class Foo{} Bar<Foo> bar = new Bar<Foo>(); } }",
 				"Foo", 1, 0, 1, 0, 2, 2, 0);
 	}
+
+	/**
+	 * Check that a local class can be declared in an anonymous class declaration,
+	 * and does not count as a nested class.
+	 */
+	@Test
+	public void Test_ClassDeclarationLocalInAnonymousClassDeclaration_Dec_1_AnonDec_1_LocalDec_1_NestedDec_0_Ref_0_LocalRef_0_NestedRef_0() {
+		configureParser("package bar; public class Other { Foo foo = Foo() { public void method() { class Foo {} } } }",
+				"Foo", 1, 0, 1, 0, 0, 0, 0);
+	}
+
+	/**
+	 * Check that a local class can be declared in an anonymous class declaration,
+	 * and does not count as a nested class.
+	 */
+	@Test
+	public void Test_ClassDeclarationLocalInLocalClassDeclaration_Dec_1_AnonDec_1_LocalDec_1_NestedDec_0_Ref_0_LocalRef_0_NestedRef_0() {
+		configureParser(
+				"package bar; public class Other { Foo foo = Foo() { public void method() { class Foo { public void method() { class Foo{} } } } } }",
+				"Foo", 2, 0, 2, 0, 0, 0, 0);
+	}
+
 }
