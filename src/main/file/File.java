@@ -4,8 +4,8 @@ package main.file;
  * Represents a file. Contains file name, path, and contents.
  *
  * @author Evan Quan
- * @version 1.0.0
- * @since March 18, 2018
+ * @version 1.1.0
+ * @since 2 April, 2018
  *
  */
 public class File implements Comparable<JavaFile> {
@@ -14,19 +14,6 @@ public class File implements Comparable<JavaFile> {
 	private String path;
 	private String contents;
 	private String extension;
-
-	/**
-	 * Clone constructor for File
-	 *
-	 * @param file
-	 *            to clone
-	 */
-	public File(File file) {
-		setExtension(file.getExtension());
-		setName(file.getName());
-		setPath(file.getPath());
-		setContents(file.getContents());
-	}
 
 	/**
 	 * Complete constructor for File

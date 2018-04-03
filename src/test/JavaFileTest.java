@@ -9,10 +9,10 @@ import main.file.JavaFile;
 
 /**
  * JUnit 4 tests for JavaFile class.
- * 
+ *
  * @author Evan Quan
- * @version 0.1.0
- * @since March 16, 2018
+ * @version 1.0.0
+ * @since 2 April 2018
  *
  */
 public class JavaFileTest {
@@ -27,9 +27,9 @@ public class JavaFileTest {
 	private static String pathNew = "/home/NewName.java";
 	private static String sourceNew = "public class NewName {}";
 
-	@Before
-	public void setUp() throws Exception {
-		file = new JavaFile(nameInitial, pathInitial, sourceInitial);
+	@Test
+	public void getExtension_JAVA_EXTENTION() {
+		assertEquals(JavaFile.EXTENSION, file.getExtension());
 	}
 
 	@Test
@@ -38,13 +38,13 @@ public class JavaFileTest {
 	}
 
 	@Test
-	public void getSimpleName_simpleNameInitial_simpleNameInitial() {
-		assertEquals(simpleNameInitial, file.getSimpleName());
+	public void getPath_pathInitial_pathInitial() {
+		assertEquals(pathInitial, file.getPath());
 	}
 
 	@Test
-	public void getPath_pathInitial_pathInitial() {
-		assertEquals(pathInitial, file.getPath());
+	public void getSimpleName_simpleNameInitial_simpleNameInitial() {
+		assertEquals(simpleNameInitial, file.getSimpleName());
 	}
 
 	@Test
@@ -75,4 +75,15 @@ public class JavaFileTest {
 		file.setContents(sourceNew);
 		assertEquals(sourceNew, file.getContents());
 	}
+
+	@Before
+	public void setUp() throws Exception {
+		file = new JavaFile(nameInitial, pathInitial, sourceInitial);
+	}
+
+	@Test
+	public void test_toString() {
+		assertEquals("[name: " + nameInitial + " | path: " + pathInitial + "]\n" + sourceInitial, file.toString());
+	}
+
 }
