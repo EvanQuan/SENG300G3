@@ -7,7 +7,7 @@ import org.junit.Test;
  * reference counts for local declarations.
  *
  * @author Evan Quan
- * @version 3.1.0
+ * @version 3.2.0
  * @since 2 April 2018
  *
  */
@@ -78,7 +78,7 @@ public class TypeVisitorLocalTest extends TypeVisitorTest {
 	@Test
 	public void test_LocalReferenceArray_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
 		configureParser(
-				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[]; } }",
+				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[1]; } }",
 				"Foo", 1, 0, 1, 0, 2, 2, 0);
 	}
 
@@ -88,7 +88,7 @@ public class TypeVisitorLocalTest extends TypeVisitorTest {
 	@Test
 	public void test_LocalReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
 		configureParser(
-				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[]; } }",
+				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[1]; } }",
 				"Foo[]", 0, 0, 0, 0, 2, 2, 0);
 	}
 

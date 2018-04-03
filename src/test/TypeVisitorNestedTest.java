@@ -9,7 +9,7 @@ import main.ast.TypeVisitor;
  * reference counts for nested declarations.
  *
  * @author Evan Quan
- * @version 3.1.0
+ * @version 3.2.0
  * @since 2 April 2018
  *
  */
@@ -54,10 +54,10 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 * counts for nested references
 	 */
 	@Test
-	public void test_NestedReferenceArray_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_1_AnonRef_0_LocalRef_0_NestedRef_2() {
+	public void test_NestedReferenceArray_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_2__LocalRef_0_NestedRef_2() {
 		configureParser(
 				"package bar; public class Other { public class Foo {} public void method() { Foo[] foo = new Foo[1]; } }",
-				"bar.Other.Foo", 1, 0, 0, 1, 1, 0, 2);
+				"bar.Other.Foo", 1, 0, 0, 1, 2, 0, 2);
 	}
 
 	/**
@@ -65,10 +65,10 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 * counts for nested references
 	 */
 	@Test
-	public void test_NestedReferenceArray2_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_1_AnonRef_0_LocalRef_0_NestedRef_2() {
+	public void test_NestedReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_2_AnonRef_0_LocalRef_0_NestedRef_2() {
 		configureParser(
 				"package bar; public class Other { public class Foo {} public void method() { Foo[] foo = new Foo[1]; } }",
-				"bar.Other.Foo[]", 1, 0, 0, 1, 1, 0, 2);
+				"bar.Other.Foo[]", 0, 0, 0, 0, 2, 0, 2);
 	}
 
 	/**
@@ -76,10 +76,10 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 * counts for nested references
 	 */
 	@Test
-	public void test_NestedReferenceConstructor_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_1_AnonRef_0_LocalRef_0_NestedRef_2() {
+	public void test_NestedReferenceConstructor_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_2_LocalRef_0_NestedRef_2() {
 		configureParser(
 				"package bar; public class Other { public class Foo {} public void method() { Foo foo = new Foo(); } }",
-				"bar.Other.Foo", 1, 0, 0, 1, 1, 0, 2);
+				"bar.Other.Foo", 1, 0, 0, 1, 2, 0, 2);
 	}
 
 	/**
@@ -87,9 +87,9 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 * references
 	 */
 	@Test
-	public void test_NestedReferenceInGeneric_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_1_AnonRef_0_LocalRef_0_NestedRef_2() {
+	public void test_NestedReferenceInGeneric_Dec_1_AnonDec_0_LocalDec_0_NestedDec_1_Ref_2_LocalRef_0_NestedRef_2() {
 		configureParser(
 				"package bar; public class Other { public class Foo {} public void method() { Bar<Foo> bar = new Bar<Foo>(); } }",
-				"bar.Other.Foo", 1, 0, 0, 1, 1, 0, 2);
+				"bar.Other.Foo", 1, 0, 0, 1, 2, 0, 2);
 	}
 }

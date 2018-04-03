@@ -38,7 +38,7 @@ import main.util.Multiset;
  * @TODO Track local and nested references.
  *
  * @author Evan Quan
- * @version 3.3.0
+ * @version 3.4.0
  * @since 2 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -378,6 +378,21 @@ public class TypeVisitor extends ASTVisitor {
 		// If local array type, then BOTH nameQualified and nameSimple are empty string
 		// To get local array type reference, start from SimpleType and find ArrayType
 		// parent
+		// CHECK OUT SimpleType node
+		if (nameQualified.equals("")) {
+			// If local array, then skip this node to not add empty string reference
+			return true;
+		}
+
+		// If nested array type, then the nameQualified (stripping off the "[]") should
+		// be in the nested declarations
+		String nameQualifiedStrip = nameQualified.substring(0, nameQualified.length() - 2);
+		if (nestedDeclarations.contains(nameQualifiedStrip)) {
+			incrementNestedReference(nameQualified);
+			debug("\tAdded nested reference: " + nameQualified);
+		}
+
+		debug("\tAdded reference: " + nameQualified);
 		incrementReference(nameQualified);
 
 		return true;
@@ -616,12 +631,13 @@ public class TypeVisitor extends ASTVisitor {
 			nameQualified = packName + "." + nameQualified;
 		}
 		incrementReference(nameQualified);
-		debug("SimpleType qualified", nameQualified);
+		debug("\tQualified reference added: " + nameQualified);
 
 		// Check for nested and local types
 		if (nestedDeclarations.contains(nameQualified)) {
-			incrementNestedDeclaration(nameQualified);
+			incrementNestedReference(nameQualified);
 		}
+		debug("\tReferences: " + references);
 		return true;
 	}
 
@@ -652,6 +668,7 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(TypeDeclaration node) {
+		debug("===TypeDeclaration===");
 		ITypeBinding typeBind = node.resolveBinding();
 		String type = typeBind.getQualifiedName();
 
@@ -659,7 +676,7 @@ public class TypeVisitor extends ASTVisitor {
 		// simple names
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
-			debug("TypeDeclaration LOCAL", type);
+			debug("\tLocal declaration added: " + type);
 			incrementLocalDeclaration(type);
 		} else {
 
@@ -672,11 +689,12 @@ public class TypeVisitor extends ASTVisitor {
 				debug("\tParent: " + parentNodeName);
 
 				if (parentNode.equals(TypeDeclaration.class)) {
-					debug("TypeDeclaration NESTED", type);
+					debug("\tNested declaration added: " + type);
+					debug("\tNested declarations: " + nestedDeclarations);
 					incrementNestedDeclaration(type);
 					break;
 				} else if (parentNode.equals(CompilationUnit.class)) {
-					debug("TypeDeclaration", type);
+					debug("\tNormal added: " + type);
 					break;
 				}
 			}
@@ -684,6 +702,7 @@ public class TypeVisitor extends ASTVisitor {
 		}
 
 		incrementDeclaration(type);
+		debug("\tDeclarations: " + declarations);
 		return true;
 	}
 }

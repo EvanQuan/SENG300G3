@@ -12,43 +12,10 @@ import org.junit.Test;
  */
 public class TypeVisitorMetaTest extends TypeVisitorTest {
 
-	/**
-	 * Check that instantiating an instance of local Foo counts for local references
-	 */
-	// @Test
-	// public void
-	// test_LocalReferenceArray_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0()
-	// {
-	// configureParser(
-	// "package bar; public class Other { public void method() { class Foo{} Foo[]
-	// foo = new Foo[]; } }",
-	// "Foo", 1, 0, 1, 0, 2, 2, 0);
-	// }
-
-	// /**
-	// * Check that instantiating an instance of local Foo counts for local
-	// references
-	// */
 	@Test
-	public void test_LocalReferenceArray2_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0() {
+	public void test_NestedReferenceArray2_Dec_0_AnonDec_0_LocalDec_0_NestedDec_0_Ref_2_AnonRef_0_LocalRef_0_NestedRef_2() {
 		configureParser(
-				"package bar; public class Other { public void method() { class Foo{} Foo[] foo = new Foo[]; } }",
-				"Foo[]", 0, 0, 0, 0, 2, 2, 0);
+				"package bar; public class Other { public class Foo {} public void method() { Foo[] foo = new Foo[1]; } }",
+				"bar.Other.Foo[]", 0, 0, 0, 0, 2, 0, 2);
 	}
-	//
-	//
-	// /**
-	// * Check that referencing local Foo in generic paramters counts for local
-	// * references
-	// */
-	// @Test
-	// public void
-	// test_LocalReferenceInGeneric_Dec_1_AnonDec_0_LocalDec_1_NestedDec_0_Ref_1_AnonRef_0_LocalRef_1_NestedRef_0()
-	// {
-	// configureParser(
-	// "package bar; public class Other { public void method() { class Foo{}
-	// Bar<Foo> bar = new Bar<Foo>(); } }",
-	// "Foo", 1, 0, 1, 0, 2, 2, 0);
-	// }
-
 }
