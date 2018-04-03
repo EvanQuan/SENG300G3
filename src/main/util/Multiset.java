@@ -7,8 +7,8 @@ import java.util.Iterator;
  * Can contain multiple quantities of each element.
  *
  * @author Evan Quan
- * @version 1.4.0
- * @since 2 April, 2018
+ * @version 1.5.0
+ * @since 3 April, 2018
  *
  * @param <E>
  *            type of element contained in multiset
@@ -188,8 +188,12 @@ public class Multiset<E> implements Iterable<E> {
 		}
 	}
 
+	/**
+	 * String representation of multiset
+	 */
 	@Override
 	public String toString() {
-		return "[ Multiset | " + elements.toString() + " ]";
+		return "[ Multiset | Types: " + this.getTypeCount() + " | Elements: " + this.getElementCount() + " | "
+				+ elements.toString() + " ]";
 	}
 }

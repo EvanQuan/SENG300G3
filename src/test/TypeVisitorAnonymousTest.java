@@ -7,7 +7,7 @@ import org.junit.Test;
  * reference counts for anonymous declarations.
  *
  * @author Evan Quan
- * @version 3.1.0
+ * @version 3.2.0
  * @since 3 April 2018
  *
  */
@@ -28,9 +28,9 @@ public class TypeVisitorAnonymousTest extends TypeVisitorTest {
 	 * to the Anonymous class's parent
 	 */
 	@Test
-	public void test_ClassDeclarationAnonymousFieldDeclarationPackage_Dec_0_Ref_1_Anon_1_Local_0_Nested_0() {
+	public void test_ClassDeclarationAnonymousFieldDeclarationPackage_Dec_0_AnonDec_1_LocalDec_0_NestedDec_0_Ref_1_LocalRef_0_NestedRef_0() {
 		configureParser("package bar; public class Other { Bar bar = new Foo() { public void method(){} }; } ",
-				"bar.Foo", 0, 1, 1, 0, 0);
+				"bar.Foo", 0, 1, 0, 0, 1, 0, 0);
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class TypeVisitorAnonymousTest extends TypeVisitorTest {
 	}
 
 	@Test
-	public void test_ClassDeclarationAnonymousInAnonymousClassDeclaration_Dec_0_AnonDec_2_LocalDec_0_NestedDec_0_Ref_0_LocalRef_0_NestedDec_0() {
-		configureParser("package bar; public class Other { Foo foo = new Foo() { Foo foo = new Foo() {} } }", "Foo", 0,
-				2, 0, 0, 0, 0, 0);
+	public void test_ClassDeclarationAnonymousInAnonymousClassDeclaration_Dec_0_AnonDec_2_LocalDec_0_NestedDec_0_Ref_4_LocalRef_0_NestedDec_0() {
+		configureParser("package bar; public class Other { Foo foo = new Foo() { Foo foo = new Foo() {}; }; }",
+				"bar.Foo", 0, 2, 0, 0, 4, 0, 0);
 	}
 }

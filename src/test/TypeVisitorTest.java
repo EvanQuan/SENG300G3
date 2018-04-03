@@ -30,8 +30,8 @@ import main.file.FileManager;
 /**
  *
  * @author Evan Quan
- * @version 3.2.0
- * @since 2 April 2018
+ * @version 3.3.0
+ * @since 3 April 2018
  *
  */
 public abstract class TypeVisitorTest {
@@ -863,6 +863,16 @@ public abstract class TypeVisitorTest {
 
 		int localReferences = visitor.getLocalReferences().count(type);
 		int nestedReferences = visitor.getNestedReferences().count(type);
+
+		System.out.println("VISIT RESULTS:");
+		System.out.println("Declarations: " + visitor.getDeclarations());
+		System.out.println("Anonymous: " + visitor.getAnonymousDeclarations());
+		System.out.println("Local: " + visitor.getLocalDeclarations());
+		System.out.println("Nested: " + visitor.getNestedDeclarations());
+		System.out.println("References: " + visitor.getReferences());
+		System.out.println("Local: " + visitor.getLocalReferences());
+		System.out.println("Nested: " + visitor.getNestedReferences());
+		System.out.println(FileManager.lineSeparator + FileManager.lineSeparator);
 
 		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
 		assertEquals("Anonymous declarations", expectedAnonymousDeclarations, anonymousDeclarations);

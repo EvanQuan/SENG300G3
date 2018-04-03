@@ -172,7 +172,7 @@ public class MultisetTest {
 	@Test
 	public void test_toString() {
 		set.add("Foo");
-		assertEquals("[ Multiset | {Foo=1} ]", set.toString());
+		assertEquals("[ Multiset | Types: 1 | Elements: 1 | {Foo=1} ]", set.toString());
 	}
 
 }

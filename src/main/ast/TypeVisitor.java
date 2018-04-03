@@ -1,6 +1,7 @@
 package main.ast;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -38,7 +40,7 @@ import main.util.Multiset;
  * @TODO Track local and nested references.
  *
  * @author Evan Quan
- * @version 3.5.0
+ * @version 3.6.0
  * @since 3 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -354,10 +356,10 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		debug("===AnonymousDeclassDeclaration===");
+		debug("===AnonymousClassDeclaration===");
 		ITypeBinding typeBind = node.resolveBinding();
 		String namedQualified = typeBind.getQualifiedName();
-		debug("\tAdded QualifiedName of parent: " + namedQualified);
+		debug("\tAdded qualifiedName: " + namedQualified + " (should be empty string)");
 		incrementAnonymousDeclaration(namedQualified);
 		return true;
 	}
@@ -567,12 +569,15 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(SimpleName node) {
 		debug("===SimpleName===");
 		String nameQualified = node.getFullyQualifiedName();
+		debug("\tnameQualified: " + nameQualified);
 		// Determine if the name is a class or method name
 		// Class if static method call
 		// else method name
-		ITypeBinding binding = node.resolveTypeBinding();
-		if (binding != null) {
-			if (binding.isClass()) {
+		ITypeBinding typeBinding = node.resolveTypeBinding();
+		if (typeBinding != null) {
+			if (!typeBinding.isTypeVariable()) {
+				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
+			} else if (typeBinding.isClass()) {
 				ASTNode parent = node.getParent();
 				Class<? extends ASTNode> parentNode = parent.getClass();
 				String parentNodeName = parentNode.getSimpleName();
@@ -585,13 +590,48 @@ public class TypeVisitor extends ASTVisitor {
 					debug("\tAdded nameQualified: " + nameQualified);
 					incrementReference(nameQualified);
 				} else {
-					debug("\tNot added. " + nameQualified + " is not a method call. (Rejected to not double count).");
+					debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
 				}
 			} else {
 				debug("\tNot added. " + nameQualified + " is a method declaration.");
 			}
 		} else {
-			debug("\tNot added. " + nameQualified + " is not a static method call.");
+			// Can be either class calling static method or name of static method
+			// Determine which one by finding parent
+			String identifier = node.getIdentifier();
+			int nodeType = node.getNodeType();
+			int flags = node.getFlags();
+			Class<? extends ASTNode> c = node.nodeClassForType(nodeType);
+			if (c.isAnonymousClass() || c.isLocalClass() || c.isMemberClass()) {
+				debug("\tisClass");
+			} else {
+				debug("\tNot class");
+			}
+			debug("\tnodeType: " + nodeType);
+			debug("\tflags: " + flags);
+			debug("\tIdentifier: " + identifier);
+			ASTNode parent = node.getParent();
+			Map<?, ?> parentProperties = parent.properties();
+			StructuralPropertyDescriptor spd = node.getLocationInParent();
+			String id = spd.getId();
+			debug("\tParent properties: " + parentProperties);
+			debug("\tID: " + id);
+			Class<? extends ASTNode> parentNode = parent.getClass();
+			String parentNodeName = parentNode.getSimpleName();
+
+			// Check parent for staticMethod
+			// MethodInvocation means staticMethod is called
+			// AD HOC: to distinguish class from method name, the id of the the node's
+			// StructuralPropertieDescriptor is "expression" for the class and "name" for
+			// the method name
+			if (parentNode.equals(MethodInvocation.class) && id.equals("expression")) {
+				nameQualified = appendPackageName(nameQualified);
+				debug("\tParent: " + parentNodeName);
+				debug("\tAdded nameQualified: " + nameQualified);
+				incrementReference(nameQualified);
+			} else {
+				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
+			}
 		}
 		return true;
 
