@@ -36,11 +36,12 @@ import main.util.Multiset;
  * type T, the visitor will locate the different java types present in the
  * source code, and count the number of declarations of references for each of
  * the java types present.
- *
- * @TODO Track local and nested references.
+ * 
+ * It also tracks where declarations are anonymous, local, or nested, and if
+ * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.6.0
+ * @version 3.6.2
  * @since 3 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -48,7 +49,7 @@ public class TypeVisitor extends ASTVisitor {
 	private boolean debug;
 	private ArrayList<String> types;
 	// Declarations
-	private Multiset<String> declarations;
+	private Multiset<String> namedDeclarations;
 	private Multiset<String> anonymousDeclarations;
 	private Multiset<String> localDeclarations;
 	private Multiset<String> nestedDeclarations;
@@ -76,7 +77,7 @@ public class TypeVisitor extends ASTVisitor {
 	public TypeVisitor(boolean debug) {
 		this.debug = debug;
 		this.types = new ArrayList<String>();
-		this.declarations = new Multiset<String>();
+		this.namedDeclarations = new Multiset<String>();
 		this.anonymousDeclarations = new Multiset<String>();
 		this.localDeclarations = new Multiset<String>();
 		this.nestedDeclarations = new Multiset<String>();
@@ -147,19 +148,20 @@ public class TypeVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * @return the total number of declarations made
+	 * @return the total number of declarations made (named declarations + anonymous
+	 *         declarations)
 	 */
 	public int getDeclarationCount() {
-		return declarations.getElementCount() + anonymousDeclarations.getElementCount();
+		return namedDeclarations.getElementCount() + anonymousDeclarations.getElementCount();
 	}
 
 	/**
-	 * Get all declarations found.
+	 * Get all named declarations found.
 	 *
 	 * @return declarations
 	 */
-	public Multiset<String> getDeclarations() {
-		return declarations;
+	public Multiset<String> getNamedDeclarations() {
+		return namedDeclarations;
 	}
 
 	/**
@@ -234,7 +236,7 @@ public class TypeVisitor extends ASTVisitor {
 	private void incrementDeclaration(String type) {
 		// Check if the type exists, then increment their associated value by 1
 		addTypeToList(type);
-		declarations.add(type);
+		namedDeclarations.add(type);
 	}
 
 	/**
@@ -564,10 +566,11 @@ public class TypeVisitor extends ASTVisitor {
 
 	/**
 	 * Detects static method calls. Rejects normal method calls.
+	 * https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fdom%2FSimpleName.html
 	 */
 	@Override
 	public boolean visit(SimpleName node) {
-		debug("===SimpleName===");
+		debug("===SimpleName=== (CHECKS ONLY FOR REFERENCES FROM STATIC METHOD CALLS)");
 		String nameQualified = node.getFullyQualifiedName();
 		debug("\tnameQualified: " + nameQualified);
 		// Determine if the name is a class or method name
@@ -575,23 +578,10 @@ public class TypeVisitor extends ASTVisitor {
 		// else method name
 		ITypeBinding typeBinding = node.resolveTypeBinding();
 		if (typeBinding != null) {
+			// Reject. Following debug statements are just to clarify what is being
+			// rejected.
 			if (!typeBinding.isTypeVariable()) {
 				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
-			} else if (typeBinding.isClass()) {
-				ASTNode parent = node.getParent();
-				Class<? extends ASTNode> parentNode = parent.getClass();
-				String parentNodeName = parentNode.getSimpleName();
-
-				// Check parent for staticMethod
-				// MethodInvocation means staticMethod is called
-				if (parentNode.equals(MethodInvocation.class)) {
-					nameQualified = appendPackageName(nameQualified);
-					debug("\tParent " + parentNodeName);
-					debug("\tAdded nameQualified: " + nameQualified);
-					incrementReference(nameQualified);
-				} else {
-					debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
-				}
 			} else {
 				debug("\tNot added. " + nameQualified + " is a method declaration.");
 			}
@@ -601,12 +591,6 @@ public class TypeVisitor extends ASTVisitor {
 			String identifier = node.getIdentifier();
 			int nodeType = node.getNodeType();
 			int flags = node.getFlags();
-			Class<? extends ASTNode> c = node.nodeClassForType(nodeType);
-			if (c.isAnonymousClass() || c.isLocalClass() || c.isMemberClass()) {
-				debug("\tisClass");
-			} else {
-				debug("\tNot class");
-			}
 			debug("\tnodeType: " + nodeType);
 			debug("\tflags: " + flags);
 			debug("\tIdentifier: " + identifier);
@@ -759,7 +743,7 @@ public class TypeVisitor extends ASTVisitor {
 		}
 
 		incrementDeclaration(type);
-		debug("\tDeclarations: " + declarations);
+		debug("\tDeclarations: " + namedDeclarations);
 		return true;
 	}
 }

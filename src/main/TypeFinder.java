@@ -21,7 +21,7 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.2.0
+ * @version 3.2.1
  * @since 3 April 2018
  *
  */
@@ -99,7 +99,7 @@ public class TypeFinder {
 
 		// Given source is char[], these are required to resolve binding
 		parser.setEnvironment(null, null, null, true);
-		parser.setUnitName("SENG300GrpIt1");
+		parser.setUnitName(file.getPath());
 
 		// ensures nodes are being parsed properly
 		Map<String, String> options = JavaCore.getOptions();
@@ -121,7 +121,7 @@ public class TypeFinder {
 		Collections.sort(types);
 
 		for (String type : types) {
-			int declarationCount = visitor.getDeclarations().count(type);
+			int declarationCount = visitor.getNamedDeclarations().count(type);
 			int referenceCount = visitor.getReferences().count(type);
 			System.out.println(
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");

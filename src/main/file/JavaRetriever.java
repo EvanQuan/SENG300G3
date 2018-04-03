@@ -15,7 +15,6 @@ import java.util.jar.JarInputStream;
  * .zip file.
  *
  * @author Evan Quan
- * @author Marcello Di Benedetto
  * @version 2.0.0
  * @since March 22, 2018
  *
@@ -78,8 +77,8 @@ public class JavaRetriever {
 
 			try {
 
-				for (java.io.File file : dirContents) { // goes through all files in directory, handles the searching
-														// accordingly
+				for (File file : dirContents) { // goes through all files in directory, handles the searching
+												// accordingly
 
 					String currPath = file.getAbsolutePath();
 					int pathType = checkPathType(currPath);

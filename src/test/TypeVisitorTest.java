@@ -120,22 +120,24 @@ public abstract class TypeVisitorTest {
 	}
 
 	/**
-	 * Iteration 3 tests. Only checks Main visitor.
+	 * Iteration 3 tests. Only checks Main visitor. Checks local and nested
+	 * references are 0.
 	 *
 	 * @param source
 	 * @param type
 	 * @param expectedDeclarationCount
 	 * @param expectedReferenceCount
-	 * @param expectedAnonymousCount
-	 * @param expectedLocalCount
-	 * @param expectedNestedCount
+	 * @param expectedAnonymousDeclarations
+	 * @param expectedLocalDeclarations
+	 * @param expectedNestedDeclarations
 	 */
 	protected static void configureParser(String source, String type, int expectedDeclarationCount,
-			int expectedReferenceCount, int expectedAnonymousCount, int expectedLocalCount, int expectedNestedCount) {
+			int expectedReferenceCount, int expectedAnonymousDeclarations, int expectedLocalDeclarations,
+			int expectedNestedDeclarations) {
 		switch (CURRENT_VISITOR_TO_TEST) {
 		case MAIN:
-			configureParserMain(source, type, expectedDeclarationCount, expectedAnonymousCount, expectedLocalCount,
-					expectedNestedCount, expectedReferenceCount, 0, 0);
+			configureParserMain(source, type, expectedDeclarationCount, expectedAnonymousDeclarations,
+					expectedLocalDeclarations, expectedNestedDeclarations, expectedReferenceCount, 0, 0);
 			break;
 		default:
 			configureParser(source, type, expectedDeclarationCount, expectedReferenceCount);
@@ -852,7 +854,7 @@ public abstract class TypeVisitorTest {
 		TypeVisitor visitor = new TypeVisitor(true); // Debug enabled
 		cu.accept(visitor);
 
-		int declarationCount = visitor.getDeclarations().count(type);
+		int declarationCount = visitor.getNamedDeclarations().count(type);
 		int referenceCount = visitor.getReferences().count(type);
 
 		// Since anonymous class declarations don't have names, the only relevant thing
@@ -865,7 +867,7 @@ public abstract class TypeVisitorTest {
 		int nestedReferences = visitor.getNestedReferences().count(type);
 
 		System.out.println("VISIT RESULTS:");
-		System.out.println("Declarations: " + visitor.getDeclarations());
+		System.out.println("Declarations: " + visitor.getNamedDeclarations());
 		System.out.println("Anonymous: " + visitor.getAnonymousDeclarations());
 		System.out.println("Local: " + visitor.getLocalDeclarations());
 		System.out.println("Nested: " + visitor.getNestedDeclarations());

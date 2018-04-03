@@ -92,4 +92,22 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 				"package bar; public class Other { public class Foo {} public void method() { Bar<Foo> bar = new Bar<Foo>(); } }",
 				"bar.Other.Foo", 1, 0, 0, 1, 2, 0, 2);
 	}
+
+	/**
+	 * TODO What is the expected result? (IN META TEST)
+	 */
+	@Test
+	public void test_NestedDeclarationInAnonymousDeclaration_Dec_0_AnonDec_0_LocalDec_0_NestedDec0_Ref_0_LocalRef_0_NestedRef_0() {
+		configureParser("package bar; public class Other { Bar bar = new Bar() { class Foo{} } }", "Bar.Foo", 1, 0, 0,
+				1, 0, 0, 0);
+	}
+
+	/**
+	 * TODO What is the expected result? (IN META TEST)
+	 */
+	@Test
+	public void test_NestedDeclarationInLocalDeclaration_Dec_0_AnonDec_0_LocalDec_0_NestedDec0_Ref_0_LocalRef_0_NestedRef_0() {
+		configureParser("package bar; public class Other { public void method() { class Bar{ class Foo{} } } }",
+				"Bar.Foo", 1, 0, 0, 1, 0, 0, 0);
+	}
 }
