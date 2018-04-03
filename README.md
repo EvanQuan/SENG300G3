@@ -5,6 +5,8 @@ SENG 300 Group 2 Iteration 3
 
 [System Spreadsheet](https://docs.google.com/spreadsheets/d/1-xapWVodk4DW2dW3CrfHNiGbSCNzF-H4mEmOvLLXMmg/edit?usp=sharing)
 
+[Report](https://docs.google.com/document/d/1QYiC9THKIPZ7UjDQpc4Mw9hxBc-GlB3OcXumWlKw9Eo/edit)
+
 Table of Contents
 -----------------
 1. [Getting Started](#getting-started)
