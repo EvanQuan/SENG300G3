@@ -5,10 +5,10 @@ import java.util.Iterator;
 
 /**
  * Can contain multiple quantities of each element.
- * 
+ *
  * @author Evan Quan
- * @version 1.3.0
- * @since 29 March, 2018
+ * @version 1.4.0
+ * @since 2 April, 2018
  *
  * @param <E>
  *            type of element contained in multiset
@@ -26,7 +26,7 @@ public class Multiset<E> implements Iterable<E> {
 
 	/**
 	 * Add 1 element to multiset
-	 * 
+	 *
 	 * @param element
 	 */
 	public void add(E element) {
@@ -35,7 +35,7 @@ public class Multiset<E> implements Iterable<E> {
 
 	/**
 	 * Add count number of elements to multiset
-	 * 
+	 *
 	 * @param element
 	 * @param count
 	 */
@@ -48,9 +48,59 @@ public class Multiset<E> implements Iterable<E> {
 		}
 	}
 
+	public void add(Multiset<E> other) {
+		for (E element : other) {
+			add(element, other.count(element));
+		}
+	}
+
+	/**
+	 * Empties multiset
+	 */
+	public void clear() {
+		elements.clear();
+	}
+
+	/**
+	 * Return shallow copy of this multiset
+	 */
+	@Override
+	public Multiset<E> clone() {
+		Multiset<E> clone = new Multiset<E>();
+		clone.add(this);
+		return clone;
+	}
+
+	/**
+	 * Checks if multiset contains at least one of the specified element
+	 *
+	 * @param element
+	 *            to check if multiset contains it
+	 * @return true if multiset contains element, else false
+	 */
+	public boolean contains(E element) {
+		return elements.containsKey(element);
+	}
+
+	/**
+	 * Checks if the multiset is a superset of other multiset
+	 *
+	 * @param other
+	 * @return
+	 */
+	public boolean contains(Multiset<E> other) {
+		boolean doesContain = true;
+		for (E element : other) {
+			if (this.count(element) < other.count(element)) {
+				doesContain = false;
+			}
+		}
+		return doesContain;
+	}
+
 	/**
 	 * Get count of element in multiset
-	 * 
+	 *
 	 * @param element
 	 * @return count of element
 	 */
@@ -63,8 +113,44 @@ public class Multiset<E> implements Iterable<E> {
 	}
 
 	/**
+	 *
+	 * @return the total number of elements contained in this multiset
+	 */
+	public int getElementCount() {
+		int total = 0;
+		for (E element : elements.keySet()) {
+			total += elements.get(element);
+		}
+		return total;
+	}
+
+	/**
+	 *
+	 * @return the number of element types contained in this multiset
+	 */
+	public int getTypeCount() {
+		return elements.size();
+	}
+
+	/**
+	 *
+	 * @return true if multiset is empty
+	 */
+	public boolean isEmpty() {
+		return elements.isEmpty();
+	}
+
+	/**
+	 * Allows multiset to be iterated over in a foreach loop
+	 */
+	@Override
+	public Iterator<E> iterator() {
+		return elements.keySet().iterator();
+	}
+
+	/**
 	 * Remove 1 element from multiset
-	 * 
+	 *
 	 * @param element
 	 */
 	public void remove(E element) {
@@ -73,7 +159,7 @@ public class Multiset<E> implements Iterable<E> {
 
 	/**
 	 * Remove count number of elements to multiset
-	 * 
+	 *
 	 * @param element
 	 * @param count
 	 * @return true is elements are removed, else false
@@ -88,15 +174,9 @@ public class Multiset<E> implements Iterable<E> {
 		}
 	}
 
-	public void add(Multiset<E> other) {
-		for (E element : other) {
-			add(element, other.count(element));
-		}
-	}
-
 	/**
 	 * Remove all elements from multiset
-	 * 
+	 *
 	 * @param element
 	 * @return true is elements removed, else false
 	 */
@@ -108,56 +188,8 @@ public class Multiset<E> implements Iterable<E> {
 		}
 	}
 
-	/**
-	 * Empties multiset
-	 */
-	public void clear() {
-		elements.clear();
-	}
-
-	/**
-	 * 
-	 * @return true if multiset is empty
-	 */
-	public boolean isEmpty() {
-		return elements.isEmpty();
-	}
-
-	/**
-	 * 
-	 * @return the number of element types contained in this multiset
-	 */
-	public int getTypeCount() {
-		return elements.size();
-	}
-
-	/**
-	 * 
-	 * @return the total number of elements contained in this multiset
-	 */
-	public int getElementCount() {
-		int total = 0;
-		for (E element : elements.keySet()) {
-			total += elements.get(element);
-		}
-		return total;
-	}
-
-	/**
-	 * Allows multiset to be iterated over in a foreach loop
-	 */
 	@Override
-	public Iterator<E> iterator() {
-		return elements.keySet().iterator();
-	}
-
-	/**
-	 * Return shallow copy of this multiset
-	 */
-	@Override
-	public Multiset<E> clone() {
-		Multiset<E> clone = new Multiset<E>();
-		clone.add(this);
-		return clone;
+	public String toString() {
+		return "[ Multiset | " + elements.toString() + " ]";
 	}
 }

@@ -16,7 +16,7 @@ Table of Contents
 
 The Real Git Flow
 -------------------------
-[<img src="https://i.redd.it/dsdbmyoirso01.jpg">]
+<img src="https://i.redd.it/dsdbmyoirso01.jpg">
 
 
 Getting Started
