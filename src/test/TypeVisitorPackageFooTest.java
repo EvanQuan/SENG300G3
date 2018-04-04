@@ -9,8 +9,8 @@ import main.ast.TypeVisitor;
  * reference counts for bar.Foo
  *
  * @author Evan Quan
- * @version 3.0.0
- * @since 28 March 2018
+ * @version 3.1.0
+ * @since 4 April 2018
  *
  */
 public class TypeVisitorPackageFooTest extends TypeVisitorTest {
@@ -18,7 +18,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	/**
 	 * Foo class of package bar
 	 */
-	private static final String type = "bar.Foo";
+	private static final String type = "other.bar.Foo";
 
 	/**
 	 * Check that declaring the Foo class in the bar package (correct package)
@@ -26,7 +26,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testBarPackageDeclaration_Dec_1_Ref_0() {
-		configureParser("package bar; class Foo {}", type, 1, 0);
+		configureParser("package other.bar; class Foo {}", type, 1, 0);
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testBarPackageFooConstructor_Dec_0_Ref_1() {
-		configureParser("package bar; class Other { Bar bar = new Foo();}", type, 0, 1);
+		configureParser("package other.bar; class Other { Bar bar = new Foo();}", type, 0, 1);
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testBarPackageFooConstructorReturnType_Dec_0_Ref_1() {
-		configureParser("package bar; class Other { public Bar method() {return new Foo();}", type, 0, 1);
+		configureParser("package other.bar; class Other { public Bar method() {return new Foo();}", type, 0, 1);
 	}
 
 	/**
@@ -53,8 +53,8 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testBarPackageFooReturnType_Dec_0_Ref_1() {
-		configureParser("package bar; class Other { public Bar method() { Bar foo = new Foo(); return foo;}", type, 0,
-				1);
+		configureParser("package other.bar; class Other { public Bar method() { Bar foo = new Foo(); return foo;}",
+				type, 0, 1);
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testBarPackageReference_Dec_0_Ref_1() {
-		configureParser("package bar; class Other { Foo f; }", type, 0, 1);
+		configureParser("package other.bar; class Other { Foo f; }", type, 0, 1);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void testImportStatement_Dec_0_Ref_1() {
-		configureParser("package other; import bar.Foo; class Other {}", type, 0, 1);
+		configureParser("package other; import other.bar.Foo; class Other {}", type, 0, 1);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_ReturnStaticField_Dec_0_Ref_1() {
-		configureParser("package bar; public class Other { Bar bar = Foo.staticField;}", type, 0, 1);
+		configureParser("package other.bar; public class Other { Bar bar = Foo.staticField;}", type, 0, 1);
 	}
 
 	/**
@@ -124,7 +124,8 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_SetStaticField_Dec_0_Ref_1() {
-		configureParser("package bar; public class Other { public void method() { Foo.staticField = 3;} }", type, 0, 1);
+		configureParser("package other.bar; public class Other { public void method() { Foo.staticField = 3;} }", type,
+				0, 1);
 	}
 
 	/**
@@ -134,7 +135,8 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_SetField_Dec_1_Ref_0() {
-		configureParser("package bar; public class Foo { public static int field; public void method() { field = 3;} }",
+		configureParser(
+				"package other.bar; public class Foo { public static int field; public void method() { field = 3;} }",
 				type, 1, 0);
 	}
 
@@ -144,7 +146,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_ReturnStaticFieldQualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { Bar2 bar2 = bar.Foo.staticField;}", type, 0, 1);
+		configureParser("package other; public class Other { Bar2 bar2 = other.bar.Foo.staticField;}", type, 0, 1);
 	}
 
 	/**
@@ -152,33 +154,45 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_SetStaticFieldQualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { public void method() { bar.Foo.staticField = 3;} }", type,
-				0, 1);
+		configureParser("package other; public class Other { public void method() { other.bar.Foo.staticField = 3;} }",
+				type, 0, 1);
 	}
-	
+
 	/**
-	 * Check that using a marker annotation fully qualified name accounts for package
+	 * Check that using a marker annotation fully qualified name accounts for
+	 * package
 	 */
 	@Test
 	public void test_MarkerAnnotation_CurrentPackage_Dec_0_Ref_1() {
-		configureParser("package bar; public class Other { @Foo public void method{} }", type, 0, 1);
+		configureParser("package other.bar; public class Other { @Foo public void method{} }", type, 0, 1);
 	}
-	
+
 	/**
-	 * Check that importing a marker annotation keeps the fully qualified name and overrides package qualifier
+	 * Check that importing a marker annotation keeps the fully qualified name and
+	 * overrides package qualifier
 	 */
 	@Test
 	public void test_MarkerAnnotation_Imported_Dec_0_Ref_1() {
-		configureParser("package other; import bar.Foo; public class Other { @Foo public void method{} }", type, 0, 1);
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", type,
+				0, 1);
 	}
-	
 
 	/**
-	 * Check that explicitly using the fully qualified name for marker annotation works
+	 * Check that explicitly using the fully qualified name for marker annotation
+	 * works
 	 */
 	@Test
 	public void test_MarkerAnnotation_Qualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { @bar.Foo public void method{} }", type, 0, 1);
+		configureParser("package other; public class Other { @other.bar.Foo public void method{} }", type, 0, 1);
+	}
+
+	/**
+	 * Check that declaring paramterized Foo works. More importantly, all following
+	 * references to generic E do not throw a NullPointerException.
+	 */
+	@Test
+	public void test_DeclarationParameterized_Dec_1_Ref_0() {
+		configureParser("package other.bar; public class Foo<E> implements Iterable<E> { public E m(){} }", type, 1, 0);
 	}
 
 }

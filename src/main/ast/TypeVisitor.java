@@ -41,7 +41,7 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.6.3
+ * @version 3.6.4
  * @since 4 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -586,7 +586,7 @@ public class TypeVisitor extends ASTVisitor {
 			if (!typeBinding.isTypeVariable()) {
 				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
 			} else {
-				debug("\tNot added. " + nameQualified + " is a method declaration.");
+				debug("\tNot added. " + nameQualified + " is a method declaration, or a generic type.");
 			}
 		} else {
 			// Can be either class calling static method or name of static method
@@ -680,8 +680,13 @@ public class TypeVisitor extends ASTVisitor {
 			// Check if need to add package to qualified name
 			nameQualified = packName + "." + nameQualified;
 		}
-		incrementReference(nameQualified);
-		debug("\tQualified reference added: " + nameQualified);
+		if (packBind == null) {
+			debug("\tQualified reference " + nameQualified + " NOT added. Is generic type.");
+		} else {
+
+			incrementReference(nameQualified);
+			debug("\tQualified reference added: " + nameQualified);
+		}
 
 		// Check for nested and local types
 		if (nestedDeclarations.contains(nameQualified)) {
