@@ -41,8 +41,8 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.6.2
- * @since 3 April 2018
+ * @version 3.6.3
+ * @since 4 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
 
@@ -640,7 +640,13 @@ public class TypeVisitor extends ASTVisitor {
 		// count
 		// as a reference to the default package and not append the current package name
 		IPackageBinding packBind = typeBind.getPackage();
-		String packName = packBind.getName();
+		// Check that packBind exists to prevent NullPointerException
+		String packName;
+		if (packBind != null) {
+			packName = packBind.getName();
+		} else {
+			packName = "";
+		}
 
 		// If SimpleType was imported from the default package, increment simple name
 		debug("Imports: " + importedNames);
