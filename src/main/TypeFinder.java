@@ -1,5 +1,6 @@
 package main;
 
+import java.io.PrintStream;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,7 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.2.1
+ * @version 3.3.0
  * @since 3 April 2018
  *
  */
@@ -73,6 +74,11 @@ public class TypeFinder {
 	 * Debug alters how the TypeVisitor is set up
 	 */
 	private static boolean debug;
+	/**
+	 * Defaults to System.out but can be changed to something else for debuggging
+	 */
+	private static PrintStream out = System.out;
+	private static PrintStream err = System.err;
 
 	private static ArrayList<JavaFile> javaFiles;
 	private static TypeVisitor visitor;
@@ -158,7 +164,7 @@ public class TypeFinder {
 		for (String type : types) {
 			int declarationCount = visitor.getNamedDeclarations().count(type);
 			int referenceCount = visitor.getReferences().count(type);
-			System.out.println(
+			out.println(
 					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}
 
@@ -172,13 +178,13 @@ public class TypeFinder {
 		int nestedReferences = visitor.getNestedReferences().getElementCount();
 
 		// Iteration 3
-		System.out.println("Total declarations found: " + totalDeclarations);
-		System.out.println("Anonymous declarations found: " + anonymousDeclarations);
-		System.out.println("Local declarations found: " + localDeclarations);
-		System.out.println("Nested declarations found: " + nestedDeclarations);
-		System.out.println("Total references found: " + totalReferences);
-		System.out.println("Local references found: " + localReferences);
-		System.out.println("Nested references found: " + nestedReferences);
+		out.println("Total declarations found: " + totalDeclarations);
+		out.println("Anonymous declarations found: " + anonymousDeclarations);
+		out.println("Local declarations found: " + localDeclarations);
+		out.println("Nested declarations found: " + nestedDeclarations);
+		out.println("Total references found: " + totalReferences);
+		out.println("Local references found: " + localReferences);
+		out.println("Nested references found: " + nestedReferences);
 
 	}
 
@@ -199,7 +205,7 @@ public class TypeFinder {
 			if (args.length == DEBUG_ARGUMENT_COUNT && args[DEBUG_ARGUMENT].equals("debug")) {
 				debug = true;
 			} else {
-				System.err.println(INVALID_ARGUMENT_ERROR_MESSAGE);
+				err.println(INVALID_ARGUMENT_ERROR_MESSAGE);
 				return false;
 			}
 		}
@@ -211,10 +217,26 @@ public class TypeFinder {
 		try {
 			javaFiles = JavaRetriever.getJavaContents(sourcePath);
 		} catch (NotDirectoryException e) {
-			System.err.println(INVALID_PATH_ERROR_MESSAGE);
+			err.println(INVALID_PATH_ERROR_MESSAGE);
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 *
+	 * @param newErr
+	 */
+	public static void setErr(PrintStream newErr) {
+		err = newErr;
+	}
+
+	/**
+	 *
+	 * @param newOut
+	 */
+	public static void setOut(PrintStream newOut) {
+		out = newOut;
 	}
 }

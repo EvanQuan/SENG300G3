@@ -142,8 +142,7 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 		} catch (FileNotFoundException e) {
 			fail("Output.txt cannot be found at " + path);
 		} catch (IOException e) {
-			System.setOut(out);
-			System.setErr(err);
+			restoreStream();
 			e.printStackTrace();
 			fail("You dun goofed.");
 		}

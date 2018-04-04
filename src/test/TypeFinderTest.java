@@ -6,17 +6,17 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 
+import main.TypeFinder;
+
 /**
  * @author Evan Quan
- * @version 2.0.0
- * @since 25 March 2018
+ * @version 3.0.0
+ * @since 2 April 2018
  *
  */
 public class TypeFinderTest {
 
 	protected static String OUTPUT_FILE = "Output.txt";
-	protected static PrintStream out = System.out;
-	protected static PrintStream err = System.err;
 	/**
 	 * Contents of standard output
 	 */
@@ -28,8 +28,8 @@ public class TypeFinderTest {
 	 */
 	@After
 	public void restoreStream() {
-		System.setOut(out);
-		System.setErr(err);
+		TypeFinder.setOut(System.out);
+		TypeFinder.setErr(System.err);
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class TypeFinderTest {
 	public void setUpStream() {
 		outContent = new ByteArrayOutputStream();
 		errContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
-		System.setErr(new PrintStream(errContent));
+		TypeFinder.setOut(new PrintStream(outContent));
+		TypeFinder.setErr(new PrintStream(errContent));
 	}
 }

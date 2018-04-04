@@ -1,6 +1,5 @@
 package main.ast;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -49,7 +48,6 @@ public class TypeVisitor extends ASTVisitor {
 
 	// Debug
 	private boolean debug;
-	private PrintStream out = System.out;
 
 	private ArrayList<String> types;
 	// Declarations
@@ -130,13 +128,13 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	private void debug(Object message) {
 		if (debug) {
-			out.println(message);
+			System.out.println(message);
 		}
 	}
 
 	private void debug(Object node, Object type) {
 		if (debug) {
-			out.println("Node: " + node + " | Type: " + type);
+			System.out.println("Node: " + node + " | Type: " + type);
 		}
 	}
 	/*
