@@ -61,24 +61,6 @@ Else, copy and paste this and manually reference the external jars in Eclipse :
 
 Or, just copy the same `.classpath` file from your previous iteration.
 
-#### Debug.java
-Ideally we would be debugging with JUnit test cases and the Eclipse debugger.
-However, if you feel inclined to use print statements to debug, please create a Debug class in the default package (immediately in the `src` folder) and set it to whatever you like. It will be ignored by git, so you don't have to worry about other people changing it when you push/pull.
-```java
-/**
- * Debug class. If in path ../src/Debug.java it will be ignored by git.
- */
-public class Debug {
-	/**
-	 * true if debug mode is enabled, else false
-	 */
-	public static boolean on = true;
-
-	private Debug(){
-	}
-}
-```
-
 Resources
 ---------
 
