@@ -42,7 +42,7 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.9.0
+ * @version 3.10.0
  * @since 5 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -769,14 +769,15 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(TypeDeclaration node) {
 		debug(node, "Named Class/Interface declarations. Normal, local, nested.");
 		ITypeBinding typeBind = node.resolveBinding();
-		String type = typeBind.getQualifiedName();
+		String nameQualified = typeBind.getQualifiedName();
+		String nameSimple = typeBind.getName();
 
 		boolean isNested = false;
 		boolean isLocal = false;
 		// Local classes do not have qualified names (so would be empty string) only
-		// simple names
-		if (type.equals("")) {
-			type = typeBind.getTypeDeclaration().getName();
+		// But they do have simple names
+		if (typeBind.isLocal()) {
+			nameQualified = typeBind.getTypeDeclaration().getName();
 			isLocal = true;
 		}
 		// Nested classes have at least 1 parent node as a TypeDeclaration
@@ -804,7 +805,7 @@ public class TypeVisitor extends ASTVisitor {
 
 			debug("Parent: " + parentNodeName);
 
-			if (parentNode.equals(TypeDeclaration.class)) {
+			if (parentNode.equals(TypeDeclaration.class) || parentNode.equals(AnonymousClassDeclaration.class)) {
 				isNested = true;
 			} else if (parentNode.equals(CompilationUnit.class) || parentNode.equals(TypeDeclarationStatement.class)) {
 				// CompilationUnit: Reached the top, so no more parents
@@ -816,16 +817,21 @@ public class TypeVisitor extends ASTVisitor {
 		}
 	
 		if (isNested) {
-			debug("Added nested declaration: " + type);
-			incrementNestedDeclaration(type);
+			if (nameQualified.equals("")) {
+				debug("Added nested declaration in anonymous declaration: " + nameSimple);
+				incrementNestedDeclaration(nameSimple);
+				nameQualified = nameSimple; // Changed so named declaration adds simple name
+			} else {
+				debug("Added nested declaration: " + nameQualified);
+				incrementNestedDeclaration(nameQualified);
+			}
 		}
 		if (isLocal) {
-			debug("Added local declaration: " + type);
-			incrementLocalDeclaration(type);
+			debug("Added local declaration: " + nameQualified);
+			incrementLocalDeclaration(nameQualified);
 		}
-		debug("Added named declaration: " + type);
-		incrementDeclaration(type);
-		debug("Declarations: " + namedDeclarations);
+		debug("Added named declaration: " + nameQualified);
+		incrementDeclaration(nameQualified);
 		return true;
 	}
 }

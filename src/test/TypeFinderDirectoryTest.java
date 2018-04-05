@@ -55,7 +55,7 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	@Test
 	public void test_Directory_typeFinder_existImport() {
 		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("existImport/");
-		testOutput(directory, true);
+		testOutput(directory);
 	}
 
 	/**

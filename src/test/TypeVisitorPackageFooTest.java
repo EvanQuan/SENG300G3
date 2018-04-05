@@ -50,7 +50,7 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 
 	@Test
 	public void test_MarkerAnnotation_Imported_FalsePositive_Dec_0_Ref_0() {
-		configureParser(true, "package other; import other.bar.Foo; public class Other { @Foo public void method{} }", "other.Foo",
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", "other.Foo",
 				0, 0);
 	}
 
