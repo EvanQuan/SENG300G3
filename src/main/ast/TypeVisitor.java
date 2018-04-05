@@ -42,7 +42,7 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.10.0
+ * @version 3.11.0
  * @since 5 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -528,13 +528,19 @@ public class TypeVisitor extends ASTVisitor {
 	// @Override
 	@Override
 	public boolean visit(NormalAnnotation node) {
+		debug(node, "Normal annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
-		String type = typeBind.getQualifiedName();
-		debug(node, "Normal annotation references");
-		debug("Added: " + type);
-		incrementReference(type);
-
+		String nameQualified = typeBind.getQualifiedName();
+		String nameSimple = typeBind.getName();
+		if (importedNamesSimple.contains(nameSimple)) {
+			String nameQualifiedImported = importedNames.get(importedNamesSimple.indexOf(nameSimple));
+			debug("Added imported reference: " + nameQualifiedImported);
+			incrementReference(nameQualifiedImported);
+		} else {
+			debug("Added reference: " + nameQualified);
+			incrementReference(nameQualified);
+		}
 		return true;
 	}
 
@@ -741,13 +747,19 @@ public class TypeVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SingleMemberAnnotation node) {
+		debug(node, "Single member annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
-		String type = typeBind.getQualifiedName();
-		debug(node, "Simple member annotation references");
-		debug("Added: " + type);
-		incrementReference(type);
-
+		String nameQualified = typeBind.getQualifiedName();
+		String nameSimple = typeBind.getName();
+		if (importedNamesSimple.contains(nameSimple)) {
+			String nameQualifiedImported = importedNames.get(importedNamesSimple.indexOf(nameSimple));
+			debug("Added imported reference: " + nameQualifiedImported);
+			incrementReference(nameQualifiedImported);
+		} else {
+			debug("Added reference: " + nameQualified);
+			incrementReference(nameQualified);
+		}
 		return true;
 	}
 

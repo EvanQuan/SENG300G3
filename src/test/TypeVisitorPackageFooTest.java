@@ -9,7 +9,7 @@ import main.ast.TypeVisitor;
  * reference counts for bar.Foo
  *
  * @author Evan Quan
- * @version 3.2.0
+ * @version 3.3.0
  * @since 5 April 2018
  *
  */
@@ -43,14 +43,38 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 * overrides package qualifier
 	 */
 	@Test
-	public void test_MarkerAnnotation_Imported_Dec_0_Ref_2() {
+	public void test_ImportedMarkerAnnotationAndUse_Dec_0_Ref_2() {
 		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", type,
 				0, 2);
 	}
 
 	@Test
-	public void test_MarkerAnnotation_Imported_FalsePositive_Dec_0_Ref_0() {
+	public void test_ImportedMarkerAnnotationAndUse_FalsePositive_Dec_0_Ref_0() {
 		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", "other.Foo",
+				0, 0);
+	}
+
+	@Test
+	public void test_ImportedSingleMemberAnnotationAndUse_Dec_0_Ref_2() {
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo(0) public void method{} }", type,
+				0, 2);
+	}
+
+	@Test
+	public void test_ImportedSingleMemberAnnotationAndUse_FalsePositive_Dec_0_Ref_0() {
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo(0) public void method{} }", "other.Foo",
+				0, 0);
+	}
+
+	@Test
+	public void test_ImportedNormalAnnotationAndUse_Dec_0_Ref_2() {
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo(expected = true) public void method{} }", type,
+				0, 2);
+	}
+
+	@Test
+	public void test_ImportedNormalAnnotationAndUse_FalsePositive_Dec_0_Ref_0() {
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo(expected = true) public void method{} }", "other.Foo",
 				0, 0);
 	}
 
@@ -179,17 +203,17 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	 * TODO
 	 */
 	@Test
-	public void testImportStatement_Dec_0_Ref_1() {
+	public void test_ImportStatement_Dec_0_Ref_1() {
 		configureParser("package other; import other.bar.Foo; class Other {}", type, 0, 1);
 	}
 	
 	@Test
-	public void testImportStatementAndUse_Dec_0_Ref_2() {
+	public void test_ImportStatementClassAndUse_Dec_0_Ref_2() {
 		configureParser("package other; import other.bar.Foo; class Other { Foo foo; }", type, 0, 2);
 	}
 
 	@Test
-	public void testImportStatementAndUse_FalsePositive_Dec_0_Ref_0() {
+	public void test_ImportStatementClassAndUse_FalsePositive_Dec_0_Ref_0() {
 		configureParser("package other; import other.bar.Foo; class Other { Foo foo; }", "other.Foo", 0, 0);
 	}
 	
