@@ -9,8 +9,8 @@ import main.ast.TypeVisitorI2G7;
  * reference counts for Foo
  *
  * @author Evan Quan
- * @version 2.1.0
- * @since 25 March 2018
+ * @version 3.0.0
+ * @since 5 April 2018
  *
  */
 public class TypeVisitorFooTest extends TypeVisitorTest {
@@ -212,13 +212,27 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 		configureParser("package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
 	}
 
+	/**
+	 * bar is not a class and so should not count as a reference
+	 */
 	@Test
 	public void test_ImportWildcard_Dec_0_Ref_0() {
 		configureParser("package bar; import bar.*; public class Other{}", "bar", 0, 0);
 	}
 
+	/**
+	 * other.bar is not a class and so should not count as a reference
+	 */
 	@Test
-	public void test_ImportWildcardSubpackage_Dec_0_Ref_0() {
+	public void test_ImportWildcardSubpackageDifferentPackage_Dec_0_Ref_0() {
+		configureParser("package foo; import other.bar.*; public class Other{}", "other.bar", 0, 0);
+	}
+
+	/**
+	 * other.bar is not a class and so should not count as a reference
+	 */
+	@Test
+	public void test_ImportWildcardSubpackageSamePackage_Dec_0_Ref_0() {
 		configureParser("package bar; import other.bar.*; public class Other{}", "other.bar", 0, 0);
 	}
 
