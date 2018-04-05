@@ -198,6 +198,11 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	@Test
+	public void test_ImportFromDefaultPackage_FalsePositive_Dec_0_Ref_1() {
+		configureParser("package bar; import Foo; public class Other {}", "bar.Foo", 0, 0);
+	}
+
+	@Test
 	public void test_ImportFromDefaultPackage2MethodDeclaration_Dec_0_Ref_2() {
 		configureParser("package bar; import Foo; public class Other { public void method(Foo foo) {} }", type, 0, 2);
 	}
@@ -209,7 +214,7 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_ImportFromDefaultPackageFieldDeclaration_Dec_0_Ref_2() {
-		configureParser(true, "package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
+		configureParser("package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
 	}
 
 	/**

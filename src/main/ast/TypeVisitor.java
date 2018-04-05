@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import main.util.Multiset;
@@ -41,7 +42,7 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.8.0
+ * @version 3.9.0
  * @since 5 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -62,6 +63,7 @@ public class TypeVisitor extends ASTVisitor {
 
 	private String packageName;
 	private ArrayList<String> importedNames;
+	private ArrayList<String> importedNamesSimple;
 
 	/**
 	 * Default constructor. Initialize the list of types, and the HashMaps for the
@@ -88,6 +90,7 @@ public class TypeVisitor extends ASTVisitor {
 		this.localReferences = new Multiset<String>();
 		this.nestedReferences = new Multiset<String>();
 		this.importedNames = new ArrayList<String>();
+		this.importedNamesSimple = new ArrayList<String>();
 		packageName = null;
 	}
 
@@ -317,6 +320,7 @@ public class TypeVisitor extends ASTVisitor {
 	public void resetToNewFile() {
 		// Imported names accumulate within a file, but not between files
 		importedNames.clear();
+		importedNamesSimple.clear();
 		packageName = null;
 	}
 
@@ -448,18 +452,21 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		debug(node, "Imported type references");
 		if (node.getName().resolveTypeBinding() != null) {
-			String name = node.getName().toString(); // Original, does not include asterisks
+			String nameQualified = node.getName().toString(); // Original, does not include asterisks
+			String nameSimple = nameQualified.substring(nameQualified.lastIndexOf('.') + 1);
 			String importStatement = node.toString(); // May include asterisks
 			debug("importStatement: " + importStatement);
-			debug("name: " + name);
+			debug("nameQualified: " + nameQualified);
+			debug("nameSimple: " + nameSimple);
 			// Importing wildcard (eg. import bar.*) will return only package name (bar).
 			// Since we want a fully qualified class name, we reject only package name.
 			if (!importStatement.contains(".") || !importStatement.contains("*")) {
-				debug("Added import class: " + name);
-				incrementReference(name);
-				importedNames.add(name);
+				debug("Added import class: " + nameQualified);
+				incrementReference(nameQualified);
+				importedNames.add(nameQualified);
+				importedNamesSimple.add(nameSimple);
 			} else {
-				debug("Not added: " + name + " is not a reference to a class");
+				debug("Not added: " + nameQualified + " is not a reference to a class");
 			}
 		}
 
@@ -486,13 +493,19 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(MarkerAnnotation node) {
+		debug(node, "Mark annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
-		String type = typeBind.getQualifiedName();
-		debug(node, "Mark annotation references");
-		debug("Added: " + type);
-		incrementReference(type);
-
+		String nameQualified = typeBind.getQualifiedName();
+		String nameSimple = typeBind.getName();
+		if (importedNamesSimple.contains(nameSimple)) {
+			String nameQualifiedImported = importedNames.get(importedNamesSimple.indexOf(nameSimple));
+			debug("Added imported reference: " + nameQualifiedImported);
+			incrementReference(nameQualifiedImported);
+		} else {
+			debug("Added reference: " + nameQualified);
+			incrementReference(nameQualified);
+		}
 		return true;
 	}
 
@@ -636,7 +649,7 @@ public class TypeVisitor extends ASTVisitor {
 			if (parentNode.equals(MethodInvocation.class) && id.equals("expression")) {
 				nameQualified = appendPackageName(nameQualified);
 				debug("Parent: " + parentNodeName);
-				debug("Added nameQualified: " + nameQualified);
+				debug("Added named reference: " + nameQualified);
 				incrementReference(nameQualified);
 			} else {
 				debug("Not added. " + nameQualified + " is not a class calling a static method.");
@@ -673,6 +686,7 @@ public class TypeVisitor extends ASTVisitor {
 		// If SimpleType was imported from the default package, increment simple name
 		debug(node, "Most references");
 		debug("Imported classes: " + importedNames);
+		debug("Imported classes simple: " + importedNamesSimple);
 		debug("nameSimple: " + nameSimple);
 		debug("nameQualified: " + nameQualified);
 		debug("nestedDeclarations: " + nestedDeclarations);
@@ -708,8 +722,11 @@ public class TypeVisitor extends ASTVisitor {
 		}
 		if (packBind == null) {
 			debug("Not added: " + nameQualified + ". Is generic type.");
+		} else if (importedNamesSimple.contains(nameSimple)) {
+			String nameQualifiedImported = importedNames.get(importedNamesSimple.indexOf(nameSimple));
+			incrementReference(nameQualifiedImported);
+			debug("Added imported reference: " + nameQualifiedImported);
 		} else {
-
 			incrementReference(nameQualified);
 			debug("Added reference: " + nameQualified);
 		}
@@ -742,6 +759,7 @@ public class TypeVisitor extends ASTVisitor {
 	 * counter associated to the type.
 	 *
 	 * CounterType: declaration, nested declaration, local declarations
+	 * TODO Declarations that are both nested and local. Try to avoid infinite loop
 	 *
 	 * @param node
 	 *            : TypeDeclaration
@@ -753,33 +771,59 @@ public class TypeVisitor extends ASTVisitor {
 		ITypeBinding typeBind = node.resolveBinding();
 		String type = typeBind.getQualifiedName();
 
+		boolean isNested = false;
+		boolean isLocal = false;
 		// Local classes do not have qualified names (so would be empty string) only
 		// simple names
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
-			debug("Added local: " + type);
-			incrementLocalDeclaration(type);
-		} else {
+			isLocal = true;
+		}
+		// Nested classes have at least 1 parent node as a TypeDeclaration
+		ASTNode parent = null;
+		while (!(isNested && isLocal)) {
 
-			// Nested classes have at least 1 parent node as a TypeDeclaration
-			while (true) {
-				ASTNode parent = node.getParent();
-				Class<? extends ASTNode> parentNode = parent.getClass();
-				String parentNodeName = parentNode.getSimpleName();
-
-				debug("Parent: " + parentNodeName);
-
-				if (parentNode.equals(TypeDeclaration.class)) {
-					debug("Added nested: " + type);
-					incrementNestedDeclaration(type);
-					break;
-				} else if (parentNode.equals(CompilationUnit.class)) {
+			if (parent != null) {
+				if (parent.equals(node.getParent())) {
+					// Two parents of the same type indicates infinite loop
+					// Seems to be true, but may not be
+					debug("Breaking loop of repeat parent: " + parent.getClass().getSimpleName());
 					break;
 				}
 			}
+			parent = node.getParent();
+			
+			if (parent == null) {
+				// no more parents
+				// TODO Does this ever run?
+				// Just to be safe?
+				break;
+			}
+			Class<? extends ASTNode> parentNode = parent.getClass();
+			String parentNodeName = parentNode.getSimpleName();
 
+			debug("Parent: " + parentNodeName);
+
+			if (parentNode.equals(TypeDeclaration.class)) {
+				isNested = true;
+			} else if (parentNode.equals(CompilationUnit.class) || parentNode.equals(TypeDeclarationStatement.class)) {
+				// CompilationUnit: Reached the top, so no more parents
+				// TypeDeclarationStatement: In some cases, this becomes the parent forever, so break to stop infinite loop
+				break;
+			} else if (parentNode.equals(MethodInvocation.class)) {//  TODO Is this the correct approach? Does this ever run?
+				isLocal = true;
+			}
 		}
-		debug("Added named: " + type);
+	
+		if (isNested) {
+			debug("Added nested declaration: " + type);
+			incrementNestedDeclaration(type);
+		}
+		if (isLocal) {
+			debug("Added local declaration: " + type);
+			incrementLocalDeclaration(type);
+		}
+		debug("Added named declaration: " + type);
 		incrementDeclaration(type);
 		debug("Declarations: " + namedDeclarations);
 		return true;

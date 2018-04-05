@@ -51,7 +51,7 @@ public class TypeVisitorAnonymousTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_ClassDeclarationInLocalMethodDeclaration_Dec_1_AnonDec_0_LocalDec_0_Ref_0_LocalRef_0_NestedRef_0() {
-		configureParser("public class Other { public void method() { class Foo {} Foo foo = new Foo() {}; } }", "Foo",
+		configureParser(true, "public class Other { public void method() { class Foo {} Foo foo = new Foo() {}; } }", "Foo",
 				1, 1, 1, 0, 2, 2, 0);
 	}
 

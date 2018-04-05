@@ -15,8 +15,8 @@ import main.file.FileManager;
  * JUnit 4 Tests for {@link TypeFinder} class
  *
  * @author Evan Quan
- * @version 3.0.0
- * @since 2 April 2018
+ * @version 3.0.1
+ * @since 5 April 2018
  *
  */
 public class TypeFinderDirectoryTest extends TypeFinderTest {
@@ -55,7 +55,7 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	@Test
 	public void test_Directory_typeFinder_existImport() {
 		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("existImport/");
-		testOutput(directory);
+		testOutput(directory, true);
 	}
 
 	/**
@@ -120,14 +120,30 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	 * Tests that TypeFinder finds and output the correct declaration and reference
 	 * counts of the given input path. Assumes that path exists and is valid. Output
 	 * is checked with Output.txt file in the input directory.
+	 * Debug default off.
+	 * 
+	 * @param path
+	 */
+	public void testOutput(String path) {
+		testOutput(path, false);
+	}
+	/**
+	 * Tests that TypeFinder finds and output the correct declaration and reference
+	 * counts of the given input path. Assumes that path exists and is valid. Output
+	 * is checked with Output.txt file in the input directory.
 	 *
 	 * @param path
 	 *            of directory or .jar
 	 * @throws IOException
 	 *             if path is invalid
 	 */
-	public void testOutput(String path) {
-		String[] args = { path, "debug" };
+	public void testOutput(String path, boolean debug) {
+		String[] args;
+		if (debug) {
+			args = new String[]{ path, "debug" };
+		} else {
+			args = new String[]{ path };
+		}
 		TypeFinder.main(args);
 		String expectedErr = "";
 		// Check that there is no error

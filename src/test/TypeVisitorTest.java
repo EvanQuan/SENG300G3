@@ -134,6 +134,7 @@ public abstract class TypeVisitorTest {
 		}
 	}
 
+
 	/**
 	 * Iteration 3 tests. Only checks Main visitor. Checks local and nested
 	 * references are 0.
@@ -182,6 +183,7 @@ public abstract class TypeVisitorTest {
 
 	/**
 	 * Iteration 3 tests. Only check Main visitor.
+	 * Debug off.
 	 *
 	 * @param source
 	 * @param type
@@ -196,9 +198,30 @@ public abstract class TypeVisitorTest {
 	protected static void configureParser(String source, String type, int expectedDeclarationCount,
 			int expectedAnonymousDeclarations, int expectedLocalDeclarations, int expectedNestedDeclarations,
 			int expectedReferenceCount, int expectedLocalReferences, int expectedNestedReferences) {
+		configureParser(false, source, type, expectedDeclarationCount,
+			expectedAnonymousDeclarations, expectedLocalDeclarations, expectedNestedDeclarations,
+			expectedReferenceCount, expectedLocalReferences, expectedNestedReferences);
+	}
+
+	/**
+	 * Iteration 3 tests. Only check Main visitor.
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedAnonymousDeclarations
+	 * @param expectedLocalDeclarations
+	 * @param expectedNestedDeclarations
+	 * @param expectedReferenceCount
+	 * @param expectedLocalReferences
+	 * @param expectedNestedReferences
+	 */
+	protected static void configureParser(boolean debug, String source, String type, int expectedDeclarationCount,
+			int expectedAnonymousDeclarations, int expectedLocalDeclarations, int expectedNestedDeclarations,
+			int expectedReferenceCount, int expectedLocalReferences, int expectedNestedReferences) {
 		switch (CURRENT_VISITOR_TO_TEST) {
 		case MAIN:
-			configureParserMain(source, type, expectedDeclarationCount, expectedAnonymousDeclarations,
+			configureParserMain(debug, source, type, expectedDeclarationCount, expectedAnonymousDeclarations,
 					expectedLocalDeclarations, expectedNestedDeclarations, expectedReferenceCount,
 					expectedLocalReferences, expectedNestedReferences);
 			break;
