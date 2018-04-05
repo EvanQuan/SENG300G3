@@ -21,6 +21,91 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	private static final String type = "other.bar.Foo";
 
 	/**
+	 * Check that declaring parameterized Foo works. More importantly, all following
+	 * references to generic E do not throw a NullPointerException.
+	 */
+	@Test
+	public void test_DeclarationParameterized_Dec_1_Ref_0() {
+		configureParser("package other.bar; public class Foo<E> implements Iterable<E> { public E m(){} }", type, 1, 0);
+	}
+
+	/**
+	 * Check that using a marker annotation fully qualified name accounts for
+	 * package
+	 */
+	@Test
+	public void test_MarkerAnnotation_CurrentPackage_Dec_0_Ref_1() {
+		configureParser("package other.bar; public class Other { @Foo public void method{} }", type, 0, 1);
+	}
+
+	/**
+	 * Check that importing a marker annotation keeps the fully qualified name and
+	 * overrides package qualifier
+	 */
+	@Test
+	public void test_MarkerAnnotation_Imported_Dec_0_Ref_1() {
+		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", type,
+				0, 1);
+	}
+
+	/**
+	 * Check that explicitly using the fully qualified name for marker annotation
+	 * works
+	 */
+	@Test
+	public void test_MarkerAnnotation_Qualified_Dec_0_Ref_1() {
+		configureParser("package other; public class Other { @other.bar.Foo public void method{} }", type, 0, 1);
+	}
+
+	/**
+	 * Check that calling a static field which returns and stores a value counts as
+	 * a reference
+	 */
+	@Test
+	public void test_ReturnStaticField_Dec_0_Ref_1() {
+		configureParser("package other.bar; public class Other { Bar bar = Foo.staticField;}", type, 0, 1);
+	}
+
+	/**
+	 * Check that calling a static field which returns and stores a value counts as
+	 * a reference
+	 */
+	@Test
+	public void test_ReturnStaticFieldQualified_Dec_0_Ref_1() {
+		configureParser("package other; public class Other { Bar2 bar2 = other.bar.Foo.staticField;}", type, 0, 1);
+	}
+
+	/**
+	 * Check that setting the field of Foo does not count as a reference. This is
+	 * relevant where field node checks may count a reference to Foo even if it does
+	 * not show up in the code.
+	 */
+	@Test
+	public void test_SetField_Dec_1_Ref_0() {
+		configureParser(
+				"package other.bar; public class Foo { public static int field; public void method() { field = 3;} }",
+				type, 1, 0);
+	}
+
+	/**
+	 * Check that retrieving and setting a static field counts as a reference
+	 */
+	@Test
+	public void test_SetStaticField_Dec_0_Ref_1() {
+		configureParser("package other.bar; public class Other { public void method() { Foo.staticField = 3;} }", type,
+				0, 1);
+	}
+
+	/**
+	 * Check that retrieving and setting a static field counts as a reference
+	 */
+	@Test
+	public void test_SetStaticFieldQualified_Dec_0_Ref_1() {
+		configureParser("package other; public class Other { public void method() { other.bar.Foo.staticField = 3;} }",
+				type, 0, 1);
+	}
+
+	/**
 	 * Check that declaring the Foo class in the bar package (correct package)
 	 * counts as a declaration
 	 */
@@ -85,6 +170,14 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	}
 
 	/**
+	 * TODO
+	 */
+	@Test
+	public void testImportStatement_Dec_0_Ref_1() {
+		configureParser("package other; import other.bar.Foo; class Other {}", type, 0, 1);
+	}
+
+	/**
 	 * Check that declaring the Foo class in the other package (so not bar), does
 	 * not count as a declaration
 	 */
@@ -100,99 +193,6 @@ public class TypeVisitorPackageFooTest extends TypeVisitorTest {
 	@Test
 	public void testOtherPackageReference_Dec_0_Ref_0() {
 		configureParser("package other; class Other { Foo f; }", type, 0, 0);
-	}
-
-	/**
-	 * TODO
-	 */
-	@Test
-	public void testImportStatement_Dec_0_Ref_1() {
-		configureParser("package other; import other.bar.Foo; class Other {}", type, 0, 1);
-	}
-
-	/**
-	 * Check that calling a static field which returns and stores a value counts as
-	 * a reference
-	 */
-	@Test
-	public void test_ReturnStaticField_Dec_0_Ref_1() {
-		configureParser("package other.bar; public class Other { Bar bar = Foo.staticField;}", type, 0, 1);
-	}
-
-	/**
-	 * Check that retrieving and setting a static field counts as a reference
-	 */
-	@Test
-	public void test_SetStaticField_Dec_0_Ref_1() {
-		configureParser("package other.bar; public class Other { public void method() { Foo.staticField = 3;} }", type,
-				0, 1);
-	}
-
-	/**
-	 * Check that setting the field of Foo does not count as a reference. This is
-	 * relevant where field node checks may count a reference to Foo even if it does
-	 * not show up in the code.
-	 */
-	@Test
-	public void test_SetField_Dec_1_Ref_0() {
-		configureParser(
-				"package other.bar; public class Foo { public static int field; public void method() { field = 3;} }",
-				type, 1, 0);
-	}
-
-	/**
-	 * Check that calling a static field which returns and stores a value counts as
-	 * a reference
-	 */
-	@Test
-	public void test_ReturnStaticFieldQualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { Bar2 bar2 = other.bar.Foo.staticField;}", type, 0, 1);
-	}
-
-	/**
-	 * Check that retrieving and setting a static field counts as a reference
-	 */
-	@Test
-	public void test_SetStaticFieldQualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { public void method() { other.bar.Foo.staticField = 3;} }",
-				type, 0, 1);
-	}
-
-	/**
-	 * Check that using a marker annotation fully qualified name accounts for
-	 * package
-	 */
-	@Test
-	public void test_MarkerAnnotation_CurrentPackage_Dec_0_Ref_1() {
-		configureParser("package other.bar; public class Other { @Foo public void method{} }", type, 0, 1);
-	}
-
-	/**
-	 * Check that importing a marker annotation keeps the fully qualified name and
-	 * overrides package qualifier
-	 */
-	@Test
-	public void test_MarkerAnnotation_Imported_Dec_0_Ref_1() {
-		configureParser("package other; import other.bar.Foo; public class Other { @Foo public void method{} }", type,
-				0, 1);
-	}
-
-	/**
-	 * Check that explicitly using the fully qualified name for marker annotation
-	 * works
-	 */
-	@Test
-	public void test_MarkerAnnotation_Qualified_Dec_0_Ref_1() {
-		configureParser("package other; public class Other { @other.bar.Foo public void method{} }", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring paramterized Foo works. More importantly, all following
-	 * references to generic E do not throw a NullPointerException.
-	 */
-	@Test
-	public void test_DeclarationParameterized_Dec_1_Ref_0() {
-		configureParser("package other.bar; public class Foo<E> implements Iterable<E> { public E m(){} }", type, 1, 0);
 	}
 
 }

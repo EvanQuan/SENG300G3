@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import main.ast.TypeVisitor;
+import main.file.FileManager;
 import main.file.JavaFile;
 import main.file.JavaRetriever;
 
@@ -22,8 +23,8 @@ import main.file.JavaRetriever;
  * type with that directory (recursively) or .jar file.
  *
  * @author Evan Quan
- * @version 3.3.0
- * @since 3 April 2018
+ * @version 3.4.0
+ * @since 4 April 2018
  *
  */
 public class TypeFinder {
@@ -98,7 +99,15 @@ public class TypeFinder {
 			ASTParser parser = getConfiguredASTParser(file);
 			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 			visitor.resetToNewFile();
+
+			if (debug) {
+				System.out.println("===START VISIT===");
+				System.out.println("Path: " + file.getPath());
+			}
 			cu.accept(visitor);
+			if (debug) {
+				System.out.println("===END VISIT===" + FileManager.lineSeparator + FileManager.lineSeparator);
+			}
 		}
 
 		return visitor;
@@ -185,6 +194,19 @@ public class TypeFinder {
 		out.println("Total references found: " + totalReferences);
 		out.println("Local references found: " + localReferences);
 		out.println("Nested references found: " + nestedReferences);
+
+		if (debug) { // Ignores setOut and setErr to prevent test conflict
+			System.out.println("VISIT RESULTS");
+			System.out.println("Declarations:");
+			System.out.println("\tNamed: " + visitor.getNamedDeclarations());
+			System.out.println("\tAnonymous: " + visitor.getAnonymousDeclarations());
+			System.out.println("\tLocal: " + visitor.getLocalDeclarations());
+			System.out.println("\tNested: " + visitor.getNestedDeclarations());
+			System.out.println("References:");
+			System.out.println("\tNamed: " + visitor.getReferences());
+			System.out.println("\tLocal: " + visitor.getLocalReferences());
+			System.out.println("\tNested: " + visitor.getNestedReferences());
+		}
 
 	}
 

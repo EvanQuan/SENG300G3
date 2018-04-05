@@ -41,7 +41,7 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.6.4
+ * @version 3.7.0
  * @since 4 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
@@ -88,6 +88,7 @@ public class TypeVisitor extends ASTVisitor {
 		this.localReferences = new Multiset<String>();
 		this.nestedReferences = new Multiset<String>();
 		this.importedNames = new ArrayList<String>();
+		packageName = null;
 	}
 
 	/**
@@ -126,17 +127,18 @@ public class TypeVisitor extends ASTVisitor {
 	/*
 	 * ========================= DEBUG FUNCTIONS =========================
 	 */
-	private void debug(Object message) {
+	private void debug(ASTNode node, String message) {
 		if (debug) {
-			System.out.println(message);
+			System.out.println("===" + node.getClass().getSimpleName() + "===  (" + message + ")");
 		}
 	}
 
-	private void debug(Object node, Object type) {
+	private void debug(Object message) {
 		if (debug) {
-			System.out.println("Node: " + node + " | Type: " + type);
+			System.out.println("\t" + message);
 		}
 	}
+
 	/*
 	 * ========================= HELPER FUNCTIONS =========================
 	 */
@@ -315,6 +317,7 @@ public class TypeVisitor extends ASTVisitor {
 	public void resetToNewFile() {
 		// Imported names accumulate within a file, but not between files
 		importedNames.clear();
+		packageName = null;
 	}
 
 	// TODO what is this for? Example of QualifiedType
@@ -345,11 +348,11 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override // SAME
 	public boolean visit(AnnotationTypeDeclaration node) {
-		debug("===AnnotationTypeDeclaration===");
+		debug(node, "Annotation type declarations");
 		ITypeBinding typeBind = node.resolveBinding();
 		String nameQualified = typeBind.getQualifiedName();
 
-		debug("\tAdded: ", nameQualified);
+		debug("Added: " + nameQualified);
 		incrementDeclaration(nameQualified);
 
 		return true;
@@ -361,10 +364,10 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		debug("===AnonymousClassDeclaration===");
+		debug(node, "Anonymous class declarations");
 		ITypeBinding typeBind = node.resolveBinding();
 		String namedQualified = typeBind.getQualifiedName();
-		debug("\tAdded qualifiedName: " + namedQualified + " (should be empty string)");
+		debug("Added: " + namedQualified + " (should be empty string)");
 		incrementAnonymousDeclaration(namedQualified);
 		return true;
 	}
@@ -378,11 +381,12 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ArrayType node) {
 		debug("===ArrayType===");
+		debug(node, "Nested array references");
 		ITypeBinding typeBind = node.resolveBinding();
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();
-		debug("\tnameQualified: " + nameQualified);
-		debug("\tnameSimple: " + nameSimple);
+		debug("nameQualified: " + nameQualified);
+		debug("nameSimple: " + nameSimple);
 
 		// If local array type, then BOTH nameQualified and nameSimple are empty string
 		// To get local array type reference, start from SimpleType and find ArrayType
@@ -390,6 +394,7 @@ public class TypeVisitor extends ASTVisitor {
 		// CHECK OUT SimpleType node
 		if (nameQualified.equals("")) {
 			// If local array, then skip this node to not add empty string reference
+			debug("Local array found. Skipped. Dealt with in SimpleType node.");
 			return true;
 		}
 
@@ -398,10 +403,10 @@ public class TypeVisitor extends ASTVisitor {
 		String nameQualifiedStrip = nameQualified.substring(0, nameQualified.length() - 2);
 		if (nestedDeclarations.contains(nameQualifiedStrip)) {
 			incrementNestedReference(nameQualified);
-			debug("\tAdded nested reference: " + nameQualified);
+			debug("Added nested: " + nameQualified);
 		}
 
-		debug("\tAdded reference: " + nameQualified);
+		debug("Added: " + nameQualified);
 		incrementReference(nameQualified);
 
 		return true;
@@ -421,10 +426,10 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding typeBind = node.resolveBinding();
-		String type = typeBind.getQualifiedName();
-
-		debug("EnumDeclaration", type);
-		incrementDeclaration(type);
+		String nameQualified = typeBind.getQualifiedName();
+		debug(node, "Enum declarations");
+		debug("Added: " + nameQualified);
+		incrementDeclaration(nameQualified);
 
 		return true;
 	}
@@ -436,21 +441,38 @@ public class TypeVisitor extends ASTVisitor {
 	 * package)
 	 *
 	 * import bar.*; Gets nothing
+	 *
+	 * TODO cannot deal with other.bar.*;
 	 */
 	@Override
 	public boolean visit(ImportDeclaration node) {
+		debug(node, "Imported type references");
+
+		// String name = node.getName().getFullyQualifiedName();
+		// debug("Name: " + name);
+		// Importing wildcard (eg. import bar.*) will return only package name (bar).
+		// Since we want a fully qualified class name, we reject only package name.
+		// if (!name.contains(".") || name.contains("*")) {
+		// debug("Added imported class: " + name);
+		// incrementReference(name);
+		// importedNames.add(name);
+		// } else {
+		// debug("Not added." + name + " is not a reference to a class");
+		// }
+
 		if (node.getName().resolveTypeBinding() != null) {
-			String type = node.getName().toString();
+			String name = node.getName().toString();
 			// Importing wildcard (eg. import bar.*) will return only package name (bar).
 			// Since we want a fully qualified class name, we reject only package name.
-			if (type.contains(".") || !type.contains("*")) {
-				debug("ImportDeclaration", type);
-				incrementReference(type);
-				importedNames.add(type);
+			if (name.contains(".") || !name.contains("*")) {
+				debug("Added import class: " + name);
+				incrementReference(name);
+				importedNames.add(name);
 			}
 		}
 
 		return true;
+
 	}
 
 	/**
@@ -475,8 +497,8 @@ public class TypeVisitor extends ASTVisitor {
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String type = typeBind.getQualifiedName();
-
-		debug("MarkerAnnotation", type);
+		debug(node, "Mark annotation references");
+		debug("Added: " + type);
 		incrementReference(type);
 
 		return true;
@@ -504,8 +526,8 @@ public class TypeVisitor extends ASTVisitor {
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String type = typeBind.getQualifiedName();
-
-		debug("NormalAnnotation", type);
+		debug(node, "Normal annotation references");
+		debug("Added: " + type);
 		incrementReference(type);
 
 		return true;
@@ -514,8 +536,9 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(PackageDeclaration node) {
 		IPackageBinding packageBind = node.resolveBinding();
-		packageName = packageBind.getName();
-		debug("PackageDeclaration", packageName);
+		this.packageName = packageBind.getName();
+		debug(node, "Set current package name. Does not add references");
+		debug("Current package is: " + this.packageName);
 		return true;
 	}
 
@@ -523,26 +546,30 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(PrimitiveType node) {
 		ITypeBinding typeBind = node.resolveBinding();
-		String type = typeBind.getQualifiedName();
+		String nameQualified = typeBind.getQualifiedName();
+		debug(node, "Primtive type references");
 
 		// void is not a primitive type
-		if (!type.equals("void")) {
-			debug("PrimitiveType", type);
-			incrementReference(type);
+		if (!nameQualified.equals("void")) {
+			debug("Added: " + nameQualified);
+			incrementReference(nameQualified);
+		} else {
+			debug("Not added: void is not a primitive");
 		}
 		return true;
 	}
 
 	/**
-	 * Used to detect static field calls. type: Class.field qualifier: Class
+	 * Used to detect static field calls only. type: Class.field qualifier: Class
 	 */
 	@Override
 	public boolean visit(QualifiedName node) {
-		String type = node.getFullyQualifiedName();
-		debug("QualifiedName", type);
-		debug("\tnode.getName(): " + node.getName());
-		debug("\tnode.getFullyQualifiedName(): " + node.getFullyQualifiedName());
-		debug("\tnode.getQualifier(): " + node.getQualifier());
+		debug(node, "Static field calls");
+		String nameQualified = node.getFullyQualifiedName();
+		debug("nameQualified" + nameQualified);
+		debug("node.getName(): " + node.getName());
+		debug("node.getFullyQualifiedName(): " + node.getFullyQualifiedName());
+		debug("node.getQualifier(): " + node.getQualifier());
 
 		// RETURN HERE
 		Name qualifier = node.getQualifier();
@@ -550,19 +577,22 @@ public class TypeVisitor extends ASTVisitor {
 		if (!qualifier.isQualifiedName()) {
 			qualifierName = appendPackageName(qualifierName);
 		}
-		debug("\tname qualified: " + qualifierName);
+		debug("Qualifer name: " + qualifierName);
 
 		ASTNode parent = node.getParent();
 		Class<? extends ASTNode> parentNode = parent.getClass();
 		String parentNodeName = parentNode.getSimpleName();
 
-		debug("\tParent: " + parentNodeName);
-		//
+		debug("Parent: " + parentNodeName);
+
 		// Check parent.
 		// VariableDeclarationFragment means staticField returned
 		// Assignment means static field set
 		if (parentNode.equals(VariableDeclarationFragment.class) || parentNode.equals(Assignment.class)) {
+			debug("Added static field call of class: " + qualifierName);
 			incrementReference(qualifierName);
+		} else {
+			debug("Not added. " + qualifierName + " is not a class calling a static field");
 		}
 		return true;
 	}
@@ -573,9 +603,9 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(SimpleName node) {
-		debug("===SimpleName=== (CHECKS ONLY FOR REFERENCES FROM STATIC METHOD CALLS)");
+		debug(node, "Static method call references");
 		String nameQualified = node.getFullyQualifiedName();
-		debug("\tnameQualified: " + nameQualified);
+		debug("nameQualified: " + nameQualified);
 		// Determine if the name is a class or method name
 		// Class if static method call
 		// else method name
@@ -584,9 +614,9 @@ public class TypeVisitor extends ASTVisitor {
 			// Reject. Following debug statements are just to clarify what is being
 			// rejected.
 			if (!typeBinding.isTypeVariable()) {
-				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
+				debug("Not added. " + nameQualified + " is not a class calling a static method.");
 			} else {
-				debug("\tNot added. " + nameQualified + " is a method declaration, or a generic type.");
+				debug("Not added. " + nameQualified + " is a method declaration, or a generic type.");
 			}
 		} else {
 			// Can be either class calling static method or name of static method
@@ -594,15 +624,15 @@ public class TypeVisitor extends ASTVisitor {
 			String identifier = node.getIdentifier();
 			int nodeType = node.getNodeType();
 			int flags = node.getFlags();
-			debug("\tnodeType: " + nodeType);
-			debug("\tflags: " + flags);
-			debug("\tIdentifier: " + identifier);
+			debug("nodeType: " + nodeType);
+			debug("flags: " + flags);
+			debug("Identifier: " + identifier);
 			ASTNode parent = node.getParent();
 			Map<?, ?> parentProperties = parent.properties();
 			StructuralPropertyDescriptor spd = node.getLocationInParent();
 			String id = spd.getId();
-			debug("\tParent properties: " + parentProperties);
-			debug("\tID: " + id);
+			debug("Parent properties: " + parentProperties);
+			debug("ID: " + id);
 			Class<? extends ASTNode> parentNode = parent.getClass();
 			String parentNodeName = parentNode.getSimpleName();
 
@@ -613,11 +643,11 @@ public class TypeVisitor extends ASTVisitor {
 			// the method name
 			if (parentNode.equals(MethodInvocation.class) && id.equals("expression")) {
 				nameQualified = appendPackageName(nameQualified);
-				debug("\tParent: " + parentNodeName);
-				debug("\tAdded nameQualified: " + nameQualified);
+				debug("Parent: " + parentNodeName);
+				debug("Added nameQualified: " + nameQualified);
 				incrementReference(nameQualified);
 			} else {
-				debug("\tNot added. " + nameQualified + " is not a class calling a static method.");
+				debug("Not added. " + nameQualified + " is not a class calling a static method.");
 			}
 		}
 		return true;
@@ -649,16 +679,16 @@ public class TypeVisitor extends ASTVisitor {
 		}
 
 		// If SimpleType was imported from the default package, increment simple name
-		debug("Imports: " + importedNames);
-		debug("===SimpleType===");
-		debug("\tnameSimple: " + nameSimple);
-		debug("\tnameQualified: " + nameQualified);
-		debug("\tnestedDeclarations: " + nestedDeclarations);
-		debug("\tlocalDeclarations: " + localDeclarations);
+		debug(node, "Most references");
+		debug("Imported classes: " + importedNames);
+		debug("nameSimple: " + nameSimple);
+		debug("nameQualified: " + nameQualified);
+		debug("nestedDeclarations: " + nestedDeclarations);
+		debug("localDeclarations: " + localDeclarations);
 		if (importedNames.contains(nameSimple)) {
 			// Check for import from default package
 			incrementReference(nameSimple);
-			debug("\tAdd nameSimple from default package", nameSimple);
+			debug("Added nameSimple from default package reference: " + nameSimple);
 			return true;
 		} else if (node.getParent().getClass().equals(ArrayType.class) && nameQualified.equals("")) {
 			// Check if local array, which has an empty qualifiedName
@@ -668,31 +698,35 @@ public class TypeVisitor extends ASTVisitor {
 			// Add simpleName reference
 			incrementLocalReference(nameSimple);
 			incrementReference(nameSimple);
-			debug("\tAdd local array reference: " + nameSimple + "[]");
+			debug("Added local array reference: " + nameSimple + "[]");
+			debug("Added local reference: " + nameSimple);
+			debug("Added array reference: " + nameSimple + "[]");
+			debug("Added reference: " + nameSimple);
 			return true;
 		} else if (localDeclarations.contains(nameSimple)) {
 			// Local reference
 			incrementLocalReference(nameSimple);
 			incrementReference(nameSimple);
-			debug("\tAdd local reference: " + nameSimple);
+			debug("Added reference: " + nameSimple);
+			debug("Added local reference: " + nameSimple);
 			return true;
 		} else if (!nameQualified.contains(".") && packName.length() > 0) {
 			// Check if need to add package to qualified name
 			nameQualified = packName + "." + nameQualified;
 		}
 		if (packBind == null) {
-			debug("\tQualified reference " + nameQualified + " NOT added. Is generic type.");
+			debug("Not added: " + nameQualified + ". Is generic type.");
 		} else {
 
 			incrementReference(nameQualified);
-			debug("\tQualified reference added: " + nameQualified);
+			debug("Added reference: " + nameQualified);
 		}
 
 		// Check for nested and local types
 		if (nestedDeclarations.contains(nameQualified)) {
+			debug("Added nested reference: " + nameQualified);
 			incrementNestedReference(nameQualified);
 		}
-		debug("\tReferences: " + references);
 		return true;
 	}
 
@@ -701,8 +735,8 @@ public class TypeVisitor extends ASTVisitor {
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String type = typeBind.getQualifiedName();
-
-		debug("SingleMemberAnnotation", type);
+		debug(node, "Simple member annotation references");
+		debug("Added: " + type);
 		incrementReference(type);
 
 		return true;
@@ -723,7 +757,7 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(TypeDeclaration node) {
-		debug("===TypeDeclaration===");
+		debug(node, "Named Class/Interface declarations. Normal, local, nested.");
 		ITypeBinding typeBind = node.resolveBinding();
 		String type = typeBind.getQualifiedName();
 
@@ -731,7 +765,7 @@ public class TypeVisitor extends ASTVisitor {
 		// simple names
 		if (type.equals("")) {
 			type = typeBind.getTypeDeclaration().getName();
-			debug("\tLocal declaration added: " + type);
+			debug("Added local: " + type);
 			incrementLocalDeclaration(type);
 		} else {
 
@@ -741,23 +775,21 @@ public class TypeVisitor extends ASTVisitor {
 				Class<? extends ASTNode> parentNode = parent.getClass();
 				String parentNodeName = parentNode.getSimpleName();
 
-				debug("\tParent: " + parentNodeName);
+				debug("Parent: " + parentNodeName);
 
 				if (parentNode.equals(TypeDeclaration.class)) {
-					debug("\tNested declaration added: " + type);
-					debug("\tNested declarations: " + nestedDeclarations);
+					debug("Added nested: " + type);
 					incrementNestedDeclaration(type);
 					break;
 				} else if (parentNode.equals(CompilationUnit.class)) {
-					debug("\tNormal added: " + type);
 					break;
 				}
 			}
 
 		}
-
+		debug("Added named: " + type);
 		incrementDeclaration(type);
-		debug("\tDeclarations: " + namedDeclarations);
+		debug("Declarations: " + namedDeclarations);
 		return true;
 	}
 }

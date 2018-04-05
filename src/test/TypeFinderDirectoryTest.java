@@ -127,7 +127,7 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	 *             if path is invalid
 	 */
 	public void testOutput(String path) {
-		String[] args = { path };
+		String[] args = { path, "debug" };
 		TypeFinder.main(args);
 		String expectedErr = "";
 		// Check that there is no error

@@ -9,33 +9,8 @@ import org.junit.Test;
  */
 public class TypeVisitorMetaTest extends TypeVisitorTest {
 
-	// /**
-	// * What is the expected result?
-	// */
-	// @Test
-	// public void
-	// test_NestedDeclarationInAnonymousDeclaration_Dec_0_AnonDec_0_LocalDec_0_NestedDec0_Ref_0_LocalRef_0_NestedRef_0()
-	// {
-	// configureParser("package bar; public class Other { Bar bar = new Bar() {
-	// class Foo{} } }", "Foo", 1, 0, 0, 1, 0,
-	// 0, 0);
-	// }
-	//
-	// /**
-	// * What is the expected result?
-	// */
-	// @Test
-	// public void
-	// test_NestedDeclarationInLocalDeclaration_Dec_0_AnonDec_0_LocalDec_0_NestedDec0_Ref_0_LocalRef_0_NestedRef_0()
-	// {
-	// configureParser("package bar; public class Other { public void method() {
-	// class Bar{ class Foo{} } } }",
-	// "Bar.Foo", 1, 0, 0, 1, 0, 0, 0);
-	// }
-
 	@Test
-	public void test_DeclarationParameterized_Dec_1_Ref_0() {
-		configureParser("package other.bar; public class Foo<E> implements Iterable<E> { public E m(){} }",
-				"other.bar.Foo", 1, 0);
+	public void test_ImportFromDefaultPackageFieldDeclaration_Dec_0_Ref_2() {
+		configureParser("package bar; import Foo; public class Other { private Foo foo; }", "Foo", 0, 2);
 	}
 }
