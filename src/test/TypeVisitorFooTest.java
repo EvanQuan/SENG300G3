@@ -18,34 +18,6 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	private static final String type = "Foo";
 
 	/**
-	 * Check that declaring an variable of another class that references Foo as a
-	 * generic parameter counts as a reference
-	 */
-	@Test
-	public void test_In1ParamterizedType_Dec_0_Ref_1() {
-		configureParser("public class Other{ Bar<Foo> bar;}", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring an variable of another class that references Foo as a
-	 * generic parameter twice counts as 2 references
-	 */
-	@Test
-	public void test_In1ParameterizedTypes_Dec_0_Ref_2() {
-		configureParser("public class Other{ Bar<Foo, Foo> bar;}", type, 0, 2);
-	}
-
-	/**
-	 * Check that declaring an variable of another class that references Foo as a
-	 * generic parameter twice counts as 2 references with another third generic
-	 * parameter of another class
-	 */
-	@Test
-	public void test_In3ParameterizedTypesMixed_Dec_0_Ref_2() {
-		configureParser("public class Other{ Bar<Foo, String, Foo> bar;}", type, 0, 2);
-	}
-
-	/**
 	 * Check if an annotation declaration is counted as a declaration
 	 */
 	@Test
@@ -78,6 +50,31 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
+	 * Check that declaring and instantiating a variable of wildcard parameterized
+	 * Foo counts as 2 references
+	 */
+	@Test
+	public void test_CaseSensitive_Dec_0_Ref_2() {
+		configureParser("public class FoO { FOo foo = new FoO(); Foo foO = new Foo();}", type, 0, 2);
+	}
+
+	/**
+	 * Check that casting a variable to Foo counts as a reference
+	 */
+	@Test
+	public void test_Casting_Dec_0_Ref_1() {
+		configureParser("public class Other { Bar bar = (Foo) foo;}", type, 0, 1);
+	}
+
+	/**
+	 * Check that having a Foo exception in a catch guard counts as a reference
+	 */
+	@Test
+	public void test_CatchGuard_Dec_0_Ref_1() {
+		configureParser("public class Other { public void method() {try {} catch (Foo foo){} }}", type, 0, 1);
+	}
+
+	/**
 	 * Check if declaring a meta class of Foo counts as a reference
 	 */
 	@Test
@@ -99,6 +96,24 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	@Test
 	public void test_ClassDeclaration_Dec_1_Ref_0() {
 		configureParser("class Foo {}", type, 1, 0);
+	}
+
+	/**
+	 * Check that declaring Foo with generic parameters counts as a declaration of
+	 * Foo
+	 */
+	@Test
+	public void test_ClassDeclarationGeneric_Dec_1_Ref_0() {
+		configureParser("public class Foo<T> {}", type, 1, 0);
+	}
+
+	/**
+	 * Check that declaring Foo with generic parameters that must inherit from Bar
+	 * counts as a declaration of Foo
+	 */
+	@Test
+	public void test_ClassDeclarationGenericExtends_Dec_1_Ref_0() {
+		configureParser("public class Foo<T extends Bar> {}", type, 1, 0);
 	}
 
 	/**
@@ -142,6 +157,23 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 		configureParser("enum Foo {}", type, 1, 0);
 	}
 
+	/**
+	 * Check that declaring a class that directly inherits from Foo counts as a
+	 * reference
+	 */
+	@Test
+	public void test_ExtendsDeclaration_Dec_0_Ref_1() {
+		configureParser("public class Other extends Foo {}", type, 0, 1);
+	}
+
+	/**
+	 * Check that a foreach loop counts as a reference
+	 */
+	@Test
+	public void test_ForEachLoop_Dec_0_Ref_1() {
+		configureParser("public class Other { public void method() { for (Foo f : foos){}}}", type, 0, 1);
+	}
+
 	@Test
 	public void test_ForLoopInitialization_Dec_0_Ref_1() {
 		configureParser("public class Other { public void method() { for (Foo f;;){}}}", type, 0, 1);
@@ -154,6 +186,125 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	@Test
 	public void test_IllegalSyntax_Dec_0_Ref_0() {
 		configureParser("This is invalid Java syntax; Foo foo; Foo foo2 = new Foo();", type, 0, 0);
+	}
+
+	/*
+	 * Check that importing Foo from the Default package, which is not valid Java
+	 * syntax, still counts as a reference to Foo
+	 */
+	@Test
+	public void test_ImportFromDefaultPackage_Dec_0_Ref_1() {
+		configureParser("package bar; import Foo; public class Other {}", type, 0, 1);
+	}
+
+	@Test
+	public void test_ImportFromDefaultPackage2MethodDeclaration_Dec_0_Ref_2() {
+		configureParser("package bar; import Foo; public class Other { public void method(Foo foo) {} }", type, 0, 2);
+	}
+
+	/**
+	 * Check that importing Foo from the Default package, which is not valid Java
+	 * syntax, now sets all simple names of Foo as default Package Foo even with a
+	 * package declared
+	 */
+	@Test
+	public void test_ImportFromDefaultPackageFieldDeclaration_Dec_0_Ref_2() {
+		configureParser("package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
+	}
+
+	@Test
+	public void test_ImportWildcard_Dec_0_Ref_0() {
+		configureParser("package bar; import bar.*; public class Other{}", "bar", 0, 0);
+	}
+
+	@Test
+	public void test_ImportWildcardSubpackage_Dec_0_Ref_0() {
+		configureParser("package bar; import other.bar.*; public class Other{}", "other.bar", 0, 0);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter twice counts as 2 references
+	 */
+	@Test
+	public void test_In1ParameterizedTypes_Dec_0_Ref_2() {
+		configureParser("public class Other{ Bar<Foo, Foo> bar;}", type, 0, 2);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter counts as a reference
+	 */
+	@Test
+	public void test_In1ParamterizedType_Dec_0_Ref_1() {
+		configureParser("public class Other{ Bar<Foo> bar;}", type, 0, 1);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter and instantiates it counts as 2 references
+	 */
+	@Test
+	public void test_In1ParamterizedTypeAndInstantiated_Dec_0_Ref_2() {
+		configureParser("public class Other{ Bar<Foo> bar = new Bar<Foo>();}", type, 0, 2);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter twice and instantiates it counts as 4 references
+	 */
+	@Test
+	public void test_In2ParameterizedTypesAndInstantiated_Dec_0_Ref_4() {
+		configureParser("public class Other{ Bar<Foo, Foo> bar = new Bar<Foo, Foo>();}", type, 0, 4);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter twice and instantiates it counts as 4 references, with
+	 * another third generic parameter of another class
+	 */
+	@Test
+	public void test_In3ParameterizedTypesAndInstantiatedMixed_dec_0_Ref_4() {
+		configureParser("public class Other{ Bar<Foo, String, Foo> bar = new Bar<Foo, String, Foo>();}", type, 0, 4);
+	}
+
+	/**
+	 * Check that declaring an variable of another class that references Foo as a
+	 * generic parameter twice counts as 2 references with another third generic
+	 * parameter of another class
+	 */
+	@Test
+	public void test_In3ParameterizedTypesMixed_Dec_0_Ref_2() {
+		configureParser("public class Other{ Bar<Foo, String, Foo> bar;}", type, 0, 2);
+	}
+
+	/**
+	 * Check that declaring a class that has a generic parameter that inherits from
+	 * Foo counts as a reference of Foo
+	 */
+	@Test
+	public void test_InClassDeclarationGenericExtends_Dec_0_Ref_1() {
+		configureParser("public class Bar<T extends Foo> {}", type, 0, 1);
+	}
+
+	/**
+	 * Check that checking if a variable is instanceof Foo counts as a reference
+	 */
+	@Test
+	public void test_Instanceof_Dec_0_Ref_3() {
+		configureParser(
+				"public class Other { public void method() { Foo foo = new Foo(); if (foo instanceof Foo) {} }}", type,
+				0, 3);
+	}
+
+	/**
+	 * Check that instantiating an instance of Foo as an argument of another method
+	 * call counts as a reference
+	 */
+	@Test
+	public void test_InstantiateInMethod_Dec_0_Ref_1() {
+		configureParser("public class Other { public void method() { Bar bar = new Bar(); bar.accept(new Foo()); } }",
+				type, 0, 1);
 	}
 
 	/**
@@ -209,19 +360,20 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
-	 * Check if a single member annotation reference is counted as a reference
+	 * Check that a method throwing a new Foo exception counts as a reference
 	 */
 	@Test
-	public void test_SingleMemberAnnotationReference_Dec_0_Ref_1() {
-		configureParser("public class Other{@Foo(3, 4, 5) public void method() {}}", type, 0, 1);
+	public void test_MethodBodyThrowException_Dec_0_Ref_1() {
+		configureParser("public class Other { public void method() {throw new Foo();}}", type, 0, 1);
 	}
 
 	/**
-	 * Check if a normal annotation referenced is counted
+	 * Check that declaring a method that throws a Foo exception counts as a
+	 * reference
 	 */
 	@Test
-	public void test_NormalAnnotationReference_Dec_0_Ref_1() {
-		configureParser("public class Other{@Foo(expected = Bar.class) public void method() {}}", type, 0, 1);
+	public void test_MethodDeclarationThrowsException_Dec_0_Ref_1() {
+		configureParser("public class Other { public void method() throws Foo {}}", type, 0, 1);
 	}
 
 	/**
@@ -243,12 +395,46 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
+	 * Check if a normal annotation referenced is counted
+	 */
+	@Test
+	public void test_NormalAnnotationReference_Dec_0_Ref_1() {
+		configureParser("public class Other{@Foo(expected = Bar.class) public void method() {}}", type, 0, 1);
+	}
+
+	/**
 	 * Check if a class declaration of another type does not affect declaration
 	 * count
 	 */
 	@Test
 	public void test_OtherClassDeclaration_Dec_0_Ref_0() {
 		configureParser("class Other {}", type, 0, 0);
+	}
+
+	/**
+	 * Check that declaring a class that has a generic parameter that inherits from
+	 * Foo with generic parameters counts as a reference of Foo
+	 */
+	@Test
+	public void test_ParameterizedInClassDeclarationGenericExtends_Dec_0_Ref_1() {
+		configureParser("public class Bar<T extends Foo<String>> {}", type, 0, 1);
+	}
+
+	/**
+	 * Check that declaring variable of parameterized Foo counts as a reference
+	 */
+	@Test
+	public void test_ParameterizedTypeVariableDeclaration_Dec_0_Ref_1() {
+		configureParser("public class Other { Foo<Bar> foo; }", type, 0, 1);
+	}
+
+	/**
+	 * Check that declaring and instantiating variable of parameterized Foo counts
+	 * as 2 references
+	 */
+	@Test
+	public void test_ParameterizedTypeVariableInstantiation_Dec_0_Ref_2() {
+		configureParser("public class Other { Foo<Bar> foo = new Foo<Bar>(); }", type, 0, 2);
 	}
 
 	/**
@@ -261,55 +447,8 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
-	 * Check if a a variable declaration and setting as another variable's value is
-	 * counted as a reference
-	 */
-	@Test
-	public void test_SetVariable_Dec_0_Ref_1() {
-		configureParser("public class Other { Foo foo = anotherFoo;}", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring an variable of another class that references Foo as
-	 * a generic parameter and instantiates it counts as 2 references
-	 */
-	@Test
-	public void test_In1ParamterizedTypeAndInstantiated_Dec_0_Ref_2() {
-		configureParser("public class Other{ Bar<Foo> bar = new Bar<Foo>();}", type, 0, 2);
-	}
-
-	/**
-	 * Check that declaring an variable of another class that references Foo as
-	 * a generic parameter twice and instantiates it counts as 4 references
-	 */
-	@Test
-	public void test_In2ParameterizedTypesAndInstantiated_Dec_0_Ref_4() {
-		configureParser("public class Other{ Bar<Foo, Foo> bar = new Bar<Foo, Foo>();}", type, 0, 4);
-	}
-
-	/**
-	 * Check that declaring an variable of another class that references Foo as
-	 * a generic parameter twice and instantiates it counts as 4 references, with
-	 * another third generic parameter of another class
-	 */
-	@Test
-	public void test_In3ParameterizedTypesAndInstantiatedMixed_dec_0_Ref_4() {
-		configureParser("public class Other{ Bar<Foo, String, Foo> bar = new Bar<Foo, String, Foo>();}", type, 0, 4);
-	}
-
-	/**
-	 * Check if a variable declaration within a switch statement counts as a
-	 * reference
-	 */
-	@Test
-	public void test_SwitchStatementVariableDeclaration_Dec_0_Ref_1() {
-		configureParser("public class Other{ public void method() { int x = 1; switch(x){" + "case 1:" + "Foo foo;"
-				+ "break;" + "case 2:" + "break;" + "default:" + "} }}", type, 0, 1);
-	}
-
-	/**
-	 * Check that calling a static field which returns and stores a value
-	 * counts as a reference
+	 * Check that calling a static field which returns and stores a value counts as
+	 * a reference
 	 */
 	@Test
 	public void test_ReturnStaticField_Dec_0_Ref_1() {
@@ -317,8 +456,8 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
-	 * Check that calling a static method which returns and stores a value
-	 * counts as a reference
+	 * Check that calling a static method which returns and stores a value counts as
+	 * a reference
 	 */
 	@Test
 	public void test_ReturnStaticMethod_Dec_0_Ref_1() {
@@ -343,153 +482,38 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	}
 
 	/**
-	 * Check that declaring variable of parameterized Foo counts as a reference
+	 * Check if a a variable declaration and setting as another variable's value is
+	 * counted as a reference
 	 */
 	@Test
-	public void test_ParameterizedTypeVariableDeclaration_Dec_0_Ref_1() {
-		configureParser("public class Other { Foo<Bar> foo; }", type, 0, 1);
+	public void test_SetVariable_Dec_0_Ref_1() {
+		configureParser("public class Other { Foo foo = anotherFoo;}", type, 0, 1);
 	}
 
 	/**
-	 * Check that declaring and instantiating variable  of parameterized Foo counts as 2 references
+	 * Check if a single member annotation reference is counted as a reference
 	 */
 	@Test
-	public void test_ParameterizedTypeVariableInstantiation_Dec_0_Ref_2() {
-		configureParser("public class Other { Foo<Bar> foo = new Foo<Bar>(); }", type, 0, 2);
+	public void test_SingleMemberAnnotationReference_Dec_0_Ref_1() {
+		configureParser("public class Other{@Foo(3, 4, 5) public void method() {}}", type, 0, 1);
 	}
 
 	/**
-	 * Check that casting a variable to Foo counts as a reference
+	 * Check if a variable declaration within a switch statement counts as a
+	 * reference
 	 */
 	@Test
-	public void test_Casting_Dec_0_Ref_1() {
-		configureParser("public class Other { Bar bar = (Foo) foo;}", type, 0, 1);
+	public void test_SwitchStatementVariableDeclaration_Dec_0_Ref_1() {
+		configureParser("public class Other{ public void method() { int x = 1; switch(x){" + "case 1:" + "Foo foo;"
+				+ "break;" + "case 2:" + "break;" + "default:" + "} }}", type, 0, 1);
 	}
 
 	/**
-	 * Check that a foreach loop counts as a reference
-	 */
-	@Test
-	public void test_ForEachLoop_Dec_0_Ref_1() {
-		configureParser("public class Other { public void method() { for (Foo f : foos){}}}", type, 0, 1);
-	}
-
-	/**
-	 * Check that checking if a variable is instanceof Foo counts as a reference
-	 */
-	@Test
-	public void test_Instanceof_Dec_0_Ref_3() {
-		configureParser(
-				"public class Other { public void method() { Foo foo = new Foo(); if (foo instanceof Foo) {} }}", type,
-				0, 3);
-	}
-
-	/**
-	 * Check that declaring a method that throws a Foo exception counts as a reference
-	 */
-	@Test
-	public void test_MethodDeclarationThrowsException_Dec_0_Ref_1() {
-		configureParser("public class Other { public void method() throws Foo {}}", type, 0, 1);
-	}
-
-	/**
-	 * Check that a method throwing a new Foo exception counts as a reference
-	 */
-	@Test
-	public void test_MethodBodyThrowException_Dec_0_Ref_1() {
-		configureParser("public class Other { public void method() {throw new Foo();}}", type, 0, 1);
-	}
-
-	/**
-	 * Check that having a Foo exception in a catch guard counts as a reference
-	 */
-	@Test
-	public void test_CatchGuard_Dec_0_Ref_1() {
-		configureParser("public class Other { public void method() {try {} catch (Foo foo){} }}", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring a class that directly inherits from Foo counts as a reference
-	 */
-	@Test
-	public void test_ExtendsDeclaration_Dec_0_Ref_1() {
-		configureParser("public class Other extends Foo {}", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring a variable of wildcard parameterized Foo counts as a reference
+	 * Check that declaring a variable of wildcard parameterized Foo counts as a
+	 * reference
 	 */
 	@Test
 	public void test_WildcardParamterFieldDeclaration_Dec_0_Ref_1() {
 		configureParser("public class Other {Foo<?> foo;}", type, 0, 1);
-	}
-
-	/**
-	 * Check that declaring and instantiating a variable of wildcard parameterized Foo counts as 2 references
-	 */
-	@Test
-	public void test_CaseSensitive_Dec_0_Ref_2() {
-		configureParser("public class FoO { FOo foo = new FoO(); Foo foO = new Foo();}", type, 0, 2);
-	}
-
-	/**
-	 * Check that instantiating an instance of Foo as an argument of another method call counts as a reference
-	 */
-	@Test
-	public void test_InstantiateInMethod_Dec_0_Ref_1() {
-		configureParser("public class Other { public void method() { Bar bar = new Bar(); bar.accept(new Foo()); } }", type, 0, 1);
-	}
-	
-	/**
-	 * Check that declaring Foo with generic parameters counts as a declaration of Foo
-	 */
-	@Test
-	public void test_ClassDeclarationGeneric_Dec_1_Ref_0() {
-		configureParser("public class Foo<T> {}", type, 1, 0);
-	}
-	
-	/**
-	 * Check that declaring Foo with generic parameters that must inherit from Bar counts as a declaration of Foo
-	 */
-	@Test
-	public void test_ClassDeclarationGenericExtends_Dec_1_Ref_0() {
-		configureParser("public class Foo<T extends Bar> {}", type, 1, 0);
-	}
-
-	/**
-	 * Check that declaring a class that has a generic parameter that inherits from Foo counts as a reference of Foo
-	 */
-	@Test
-	public void test_InClassDeclarationGenericExtends_Dec_0_Ref_1() {
-		configureParser("public class Bar<T extends Foo> {}", type, 0, 1);
-	}
-	
-	/**
-	 * Check that declaring a class that has a generic parameter that inherits from Foo with generic parameters counts as a reference of Foo
-	 */
-	@Test
-	public void test_ParameterizedInClassDeclarationGenericExtends_Dec_0_Ref_1() {
-		configureParser("public class Bar<T extends Foo<String>> {}", type, 0, 1);
-	}
-	
-	/*
-	 * Check that importing Foo from the Default package, which is not valid Java syntax, still counts as a reference to Foo
-	 */
-	@Test
-	public void test_ImportFromDefaultPackage_Dec_0_Ref_1() {
-		configureParser("package bar; import Foo; public class Other {}", type, 0, 1);
-	}
-	
-	/**
-	 * Check that importing Foo from the Default package, which is not valid Java syntax, now sets all simple names of Foo as default Package Foo even with a package declared
-	 */
-	@Test
-	public void test_ImportFromDefaultPackageFieldDeclaration_Dec_0_Ref_2() {
-		configureParser("package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
-	}
-	
-	@Test
-	public void test_ImportFromDefaultPackage2MethodDeclaration_Dec_0_Ref_2() {
-		configureParser("package bar; import Foo; public class Other { public void method(Foo foo) {} }", type, 0, 2);
 	}
 }
