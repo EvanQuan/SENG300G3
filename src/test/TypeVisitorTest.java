@@ -56,7 +56,6 @@ public abstract class TypeVisitorTest {
 	public static final int I2G8 = 208; // 89:0:35
 	public static final int I2G9 = 209; // 10:0:111
 	protected static String ls = FileManager.lineSeparator;
-	protected static boolean debug = true;
 
 	/**
 	 * Change this to the visitor that you want to test
@@ -67,7 +66,8 @@ public abstract class TypeVisitorTest {
 	 * Determines which Visitor to use. Accounts for to iteration 2 and below
 	 * requirements. If iteration 3 visitor, sets anonymous, local and nested counts
 	 * to 0.
-	 *
+	 * 
+	 * Debug is default off.
 	 * @param source
 	 * @param type
 	 * @param expectedDeclarationCount
@@ -75,9 +75,24 @@ public abstract class TypeVisitorTest {
 	 */
 	protected static void configureParser(String source, String type, int expectedDeclarationCount,
 			int expectedReferenceCount) {
+		configureParser(false, source, type, expectedDeclarationCount,
+			expectedReferenceCount);
+	}
+	/**
+	 * Determines which Visitor to use. Accounts for to iteration 2 and below
+	 * requirements. If iteration 3 visitor, sets anonymous, local and nested counts
+	 * to 0.
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 */
+	protected static void configureParser(boolean debug, String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount) {
 		switch (CURRENT_VISITOR_TO_TEST) {
 		case MAIN:
-			configureParserMain(source, type, expectedDeclarationCount, 0, 0, 0, expectedReferenceCount, 0, 0);
+			configureParserMain(debug, source, type, expectedDeclarationCount, 0, 0, 0, expectedReferenceCount, 0, 0);
 			break;
 		case I1G2:
 			configureParser_1_2(source, type, expectedDeclarationCount, expectedReferenceCount);
@@ -122,7 +137,8 @@ public abstract class TypeVisitorTest {
 	/**
 	 * Iteration 3 tests. Only checks Main visitor. Checks local and nested
 	 * references are 0.
-	 *
+	 * 
+	 * Debug is default off.
 	 * @param source
 	 * @param type
 	 * @param expectedDeclarationCount
@@ -134,9 +150,29 @@ public abstract class TypeVisitorTest {
 	protected static void configureParser(String source, String type, int expectedDeclarationCount,
 			int expectedReferenceCount, int expectedAnonymousDeclarations, int expectedLocalDeclarations,
 			int expectedNestedDeclarations) {
+			configureParser(false, source, type, expectedDeclarationCount,
+			expectedReferenceCount, expectedAnonymousDeclarations, expectedLocalDeclarations,
+			expectedNestedDeclarations);
+	}
+
+	/**
+	 * Iteration 3 tests. Only checks Main visitor. Checks local and nested
+	 * references are 0.
+	 *
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedReferenceCount
+	 * @param expectedAnonymousDeclarations
+	 * @param expectedLocalDeclarations
+	 * @param expectedNestedDeclarations
+	 */
+	protected static void configureParser(boolean debug, String source, String type, int expectedDeclarationCount,
+			int expectedReferenceCount, int expectedAnonymousDeclarations, int expectedLocalDeclarations,
+			int expectedNestedDeclarations) {
 		switch (CURRENT_VISITOR_TO_TEST) {
 		case MAIN:
-			configureParserMain(source, type, expectedDeclarationCount, expectedAnonymousDeclarations,
+			configureParserMain(debug, source, type, expectedDeclarationCount, expectedAnonymousDeclarations,
 					expectedLocalDeclarations, expectedNestedDeclarations, expectedReferenceCount, 0, 0);
 			break;
 		default:
@@ -818,6 +854,29 @@ public abstract class TypeVisitorTest {
 
 	}
 
+
+	/**
+	 * Configures ASTParser and visitor for source file
+	 * Debug is default off to not clutter console.
+	 * 
+	 * @param source
+	 * @param type
+	 * @param expectedDeclarationCount
+	 * @param expectedAnonymousDeclarations
+	 * @param expectedLocaDeclarations
+	 * @param expectedNestedDeclarations
+	 * @param expectedReferenceCount
+	 * @param expectedLocalReferences
+	 * @param expectedNestedReferences
+	 */
+	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
+			int expectedAnonymousDeclarations, int expectedLocaDeclarations, int expectedNestedDeclarations,
+			int expectedReferenceCount, int expectedLocalReferences, int expectedNestedReferences) {
+			configureParserMain(false, source, type, expectedDeclarationCount,
+			expectedAnonymousDeclarations, expectedLocaDeclarations, expectedNestedDeclarations,
+			expectedReferenceCount, expectedLocalReferences, expectedNestedReferences);
+	}
+
 	/**
 	 * Configures ASTParser and visitor for source file
 	 *
@@ -826,7 +885,7 @@ public abstract class TypeVisitorTest {
 	 * @param expectedDeclarationCount
 	 * @param expectedReferenceCount
 	 */
-	protected static void configureParserMain(String source, String type, int expectedDeclarationCount,
+	protected static void configureParserMain(boolean debug, String source, String type, int expectedDeclarationCount,
 			int expectedAnonymousDeclarations, int expectedLocaDeclarations, int expectedNestedDeclarations,
 			int expectedReferenceCount, int expectedLocalReferences, int expectedNestedReferences) {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
@@ -851,7 +910,7 @@ public abstract class TypeVisitorTest {
 
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
-		TypeVisitor visitor = new TypeVisitor(true); // Debug enabled
+		TypeVisitor visitor = new TypeVisitor(debug);
 		cu.accept(visitor);
 
 		int declarationCount = visitor.getNamedDeclarations().count(type);
@@ -866,15 +925,17 @@ public abstract class TypeVisitorTest {
 		int localReferences = visitor.getLocalReferences().count(type);
 		int nestedReferences = visitor.getNestedReferences().count(type);
 
-		System.out.println("VISIT RESULTS:");
-		System.out.println("Declarations: " + visitor.getNamedDeclarations());
-		System.out.println("Anonymous: " + visitor.getAnonymousDeclarations());
-		System.out.println("Local: " + visitor.getLocalDeclarations());
-		System.out.println("Nested: " + visitor.getNestedDeclarations());
-		System.out.println("References: " + visitor.getReferences());
-		System.out.println("Local: " + visitor.getLocalReferences());
-		System.out.println("Nested: " + visitor.getNestedReferences());
-		System.out.println(FileManager.lineSeparator + FileManager.lineSeparator);
+		if (debug) {
+			System.out.println("VISIT RESULTS:");
+			System.out.println("Declarations: " + visitor.getNamedDeclarations());
+			System.out.println("Anonymous: " + visitor.getAnonymousDeclarations());
+			System.out.println("Local: " + visitor.getLocalDeclarations());
+			System.out.println("Nested: " + visitor.getNestedDeclarations());
+			System.out.println("References: " + visitor.getReferences());
+			System.out.println("Local: " + visitor.getLocalReferences());
+			System.out.println("Nested: " + visitor.getNestedReferences());
+			System.out.println(FileManager.lineSeparator + FileManager.lineSeparator);
+		}
 
 		assertEquals("Declaration count", expectedDeclarationCount, declarationCount);
 		assertEquals("Anonymous declarations", expectedAnonymousDeclarations, anonymousDeclarations);

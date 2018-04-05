@@ -41,8 +41,8 @@ import main.util.Multiset;
  * references are local or nested.
  *
  * @author Evan Quan
- * @version 3.7.0
- * @since 4 April 2018
+ * @version 3.8.0
+ * @since 5 April 2018
  */
 public class TypeVisitor extends ASTVisitor {
 
@@ -447,27 +447,19 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(ImportDeclaration node) {
 		debug(node, "Imported type references");
-
-		// String name = node.getName().getFullyQualifiedName();
-		// debug("Name: " + name);
-		// Importing wildcard (eg. import bar.*) will return only package name (bar).
-		// Since we want a fully qualified class name, we reject only package name.
-		// if (!name.contains(".") || name.contains("*")) {
-		// debug("Added imported class: " + name);
-		// incrementReference(name);
-		// importedNames.add(name);
-		// } else {
-		// debug("Not added." + name + " is not a reference to a class");
-		// }
-
 		if (node.getName().resolveTypeBinding() != null) {
-			String name = node.getName().toString();
+			String name = node.getName().toString(); // Original, does not include asterisks
+			String importStatement = node.toString(); // May include asterisks
+			debug("importStatement: " + importStatement);
+			debug("name: " + name);
 			// Importing wildcard (eg. import bar.*) will return only package name (bar).
 			// Since we want a fully qualified class name, we reject only package name.
-			if (name.contains(".") || !name.contains("*")) {
+			if (!importStatement.contains(".") || !importStatement.contains("*")) {
 				debug("Added import class: " + name);
 				incrementReference(name);
 				importedNames.add(name);
+			} else {
+				debug("Not added: " + name + " is not a reference to a class");
 			}
 		}
 

@@ -209,7 +209,7 @@ public class TypeVisitorFooTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_ImportFromDefaultPackageFieldDeclaration_Dec_0_Ref_2() {
-		configureParser("package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
+		configureParser(true, "package bar; import Foo; public class Other { private Foo foo; }", type, 0, 2);
 	}
 
 	/**
