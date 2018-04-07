@@ -47,7 +47,7 @@ public class TypeFinder {
 	/**
 	 * Index of debug argument
 	 */
-	private static final int DEBUG_ARGUMENT = VALID_ARGUMENT_COUNT;
+	private static final int DEBUG_ARGUMENT = 0;
 	/**
 	 * Error message when the user inputs a directory or jar file that TypeFinder
 	 * cannot recognize. This may be because the directory or jar file does not
@@ -145,21 +145,61 @@ public class TypeFinder {
 	 * Initiates the program
 	 *
 	 * @param args
-	 *            command line arguments args[0] path of directory/jar file of
+	 *            command line arguments args[] paths of directory/jar files of
 	 *            interest
 	 */
 	public static void main(String[] args) {
-		// Check if user input is valid and set up
-		boolean validInput = processInput(args);
-		if (!validInput) {
-			return; // End program
+		
+		if ((args.length == 0)) {
+			boolean validInput = processInput(args);
+			if (!validInput) {
+				return; // End program
+			}
 		}
+		String[] dir;
+		int directoryIndex;
+		int indexMax;
+		if (args[DEBUG_ARGUMENT].equals("debug")) {
+			indexMax = args.length-2;
+		}
+		else 
+			indexMax = args.length-1;
+		
+		// 
+		for (int i = 0; i <= indexMax; i++) {
+			
+			// Check for debug mode
+			if (args[DEBUG_ARGUMENT].equals("debug")) {			
+				dir = new String[2];
+				directoryIndex = 1;
 
-		// Find declaration and reference counts of java files
-		findDeclarationsAndReferences();
-
-		// Final output
-		printDeclarationsAndReferences();
+				// Copies args[i+1] to dir[1]
+				System.arraycopy(args, i+1, dir, directoryIndex, 1);
+				dir[0] = "debug";
+			}
+			else {
+				dir = new String[1];
+				directoryIndex = 0;
+				
+				// Copies args[i] to dir[0]
+				System.arraycopy(args, i, dir, directoryIndex, 1);
+			}
+			
+			// Print current directory
+			out.println(FileManager.lineSeparator+"Directory: " + dir[directoryIndex]);
+			
+			// Check if user input is valid and set up
+			boolean validInput = processInput(dir);
+			if (!validInput) {
+				return; // End program
+			}
+	
+			// Find declaration and reference counts of java files
+			findDeclarationsAndReferences();
+	
+			// Final output
+			printDeclarationsAndReferences();
+		}
 	}
 
 	/**
@@ -170,6 +210,7 @@ public class TypeFinder {
 		ArrayList<String> types = visitor.getTypes();
 		Collections.sort(types);
 
+		// Comment this block out for cleaner output
 		for (String type : types) {
 			int declarationCount = visitor.getNamedDeclarations().count(type);
 			int referenceCount = visitor.getReferences().count(type);
@@ -226,6 +267,7 @@ public class TypeFinder {
 			// Check for debug mode
 			if (args.length == DEBUG_ARGUMENT_COUNT && args[DEBUG_ARGUMENT].equals("debug")) {
 				debug = true;
+
 			} else {
 				err.println(INVALID_ARGUMENT_ERROR_MESSAGE);
 				return false;
@@ -234,6 +276,11 @@ public class TypeFinder {
 
 		// Get input from command line arguments
 		sourcePath = args[SOURCE_PATH];
+		
+		// Input is after debug argument
+		if(debug) {
+			sourcePath = args[DEBUG_ARGUMENT + 1];
+		}
 
 		// Get all all Java files from directory or jar file
 		try {

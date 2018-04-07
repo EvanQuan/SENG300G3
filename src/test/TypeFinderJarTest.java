@@ -40,7 +40,9 @@ public class TypeFinderJarTest extends TypeFinderTest {
 			String outputFileName = jarName.substring(0, jarName.length() - JavaFile.JAR_EXTENSION.length()).concat(OUTPUT_FILE);
 
 //			assertEquals("", outputFileName);
-			expectedOut = FileManager.getFileContents(path.concat(outputFileName));
+			
+			String header = FileManager.lineSeparator + "Directory: " + args[0] + FileManager.lineSeparator;
+			expectedOut = header + FileManager.getFileContents(path.concat(outputFileName));
 			String actualOut = outContent.toString();
 			assertEquals(expectedOut, actualOut);
 		} catch (IOException e) {
