@@ -394,11 +394,9 @@ public class TypeVisitor extends ASTVisitor {
 		debug(node, "Nested array references");
 		ITypeBinding typeBind = node.resolveBinding();
 		
-		if(typeBind == null) {
+		if(typeBind == null) {   //if the bindings could not be resolved, go to child node
 			return true;
 		}
-		
-		
 		
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();
@@ -508,10 +506,10 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(MarkerAnnotation node) {
 		debug(node, "Mark annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
-		if(annBind == null) {
+		
+		if(annBind == null) {			//if the bindings could not be resolved, go to child node
 			return true;
 		}
-		
 		
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String nameQualified = typeBind.getQualifiedName();
@@ -548,6 +546,11 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(NormalAnnotation node) {
 		debug(node, "Normal annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
+		
+		if(annBind == null) {			//if the bindings could not be resolved, go to child node
+			return true;
+		}
+		
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();
@@ -576,12 +579,9 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(PrimitiveType node) {
 		ITypeBinding typeBind = node.resolveBinding();
 		
-		if(typeBind == null) {
+		if(typeBind == null) {			//if the bindings could not be resolved, go to child node
 			return true;
 		}
-		
-		
-		
 		
 		String nameQualified = typeBind.getQualifiedName();
 		debug(node, "Primtive type references");
@@ -700,7 +700,7 @@ public class TypeVisitor extends ASTVisitor {
 		String nameQualified;
 		// Strips parameterized generics off
 		
-		if(typeBind == null) {
+		if(typeBind == null) {			//if the bindings could not be resolved, go to child node
 			return true;
 		}
 		
@@ -781,6 +781,11 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(SingleMemberAnnotation node) {
 		debug(node, "Single member annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
+		
+		if(annBind == null) {			//if the bindings could not be resolved, go to child node
+			return true;
+		}
+		
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();

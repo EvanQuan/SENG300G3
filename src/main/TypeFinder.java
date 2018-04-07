@@ -214,8 +214,8 @@ public class TypeFinder {
 		for (String type : types) {
 			int declarationCount = visitor.getNamedDeclarations().count(type);
 			int referenceCount = visitor.getReferences().count(type);
-			out.println(
-					type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
+			//out.println(
+			//		type + ". Declarations found: " + declarationCount + "; references found: " + referenceCount + ".");
 		}
 
 		int totalDeclarations = visitor.getDeclarationCount();
