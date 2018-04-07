@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -368,15 +369,15 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		
 		debug(node, "Anonymous class declarations");
 		ITypeBinding typeBind = node.resolveBinding();
-		
+		String namedQualified;
 		if(typeBind == null) {
-			return true;
+			namedQualified = ((ClassInstanceCreation) node.getParent()).getType().toString();
 		}
-		
-		String namedQualified = typeBind.getQualifiedName();
+		else {
+			namedQualified = typeBind.getQualifiedName();
+		}
 		debug("Added: " + namedQualified + " (should be empty string)");
 		incrementAnonymousDeclaration(namedQualified);
 		return true;
@@ -578,12 +579,13 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(PrimitiveType node) {
 		ITypeBinding typeBind = node.resolveBinding();
-		
-		if(typeBind == null) {			//if the bindings could not be resolved, go to child node
-			return true;
+		String nameQualified;
+		if(typeBind == null) {
+			nameQualified = node.toString();
 		}
-		
-		String nameQualified = typeBind.getQualifiedName();
+		else {
+			nameQualified = typeBind.getQualifiedName();
+		}
 		debug(node, "Primtive type references");
 
 		// void is not a primitive type
