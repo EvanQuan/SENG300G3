@@ -368,8 +368,14 @@ public class TypeVisitor extends ASTVisitor {
 	 */
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
+		
 		debug(node, "Anonymous class declarations");
 		ITypeBinding typeBind = node.resolveBinding();
+		
+		if(typeBind == null) {
+			return true;
+		}
+		
 		String namedQualified = typeBind.getQualifiedName();
 		debug("Added: " + namedQualified + " (should be empty string)");
 		incrementAnonymousDeclaration(namedQualified);
@@ -387,6 +393,13 @@ public class TypeVisitor extends ASTVisitor {
 		debug("===ArrayType===");
 		debug(node, "Nested array references");
 		ITypeBinding typeBind = node.resolveBinding();
+		
+		if(typeBind == null) {
+			return true;
+		}
+		
+		
+		
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();
 		debug("nameQualified: " + nameQualified);
@@ -495,6 +508,11 @@ public class TypeVisitor extends ASTVisitor {
 	public boolean visit(MarkerAnnotation node) {
 		debug(node, "Mark annotation references");
 		IAnnotationBinding annBind = node.resolveAnnotationBinding();
+		if(annBind == null) {
+			return true;
+		}
+		
+		
 		ITypeBinding typeBind = annBind.getAnnotationType();
 		String nameQualified = typeBind.getQualifiedName();
 		String nameSimple = typeBind.getName();
@@ -557,6 +575,14 @@ public class TypeVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(PrimitiveType node) {
 		ITypeBinding typeBind = node.resolveBinding();
+		
+		if(typeBind == null) {
+			return true;
+		}
+		
+		
+		
+		
 		String nameQualified = typeBind.getQualifiedName();
 		debug(node, "Primtive type references");
 
@@ -673,6 +699,12 @@ public class TypeVisitor extends ASTVisitor {
 		ITypeBinding typeBind = node.resolveBinding();
 		String nameQualified;
 		// Strips parameterized generics off
+		
+		if(typeBind == null) {
+			return true;
+		}
+		
+		
 		nameQualified = typeBind.getTypeDeclaration().getQualifiedName();
 		String nameSimple = typeBind.getTypeDeclaration().getName();
 
