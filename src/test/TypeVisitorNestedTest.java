@@ -46,8 +46,8 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_NestedDeclarationInAnonymousDeclaration_Dec_1_AnonDec_1_LocalDec_0_NestedDec1_Ref_0_LocalRef_0_NestedRef_0() {
-		configureParser("package test; public class Other { static Bar bar = new Bar() { class Foo{} }; }", "Foo", 1,
-				1, 0, 1, 0, 0, 0);
+		configureParser("package test; public class Other { static Bar bar = new Bar() { class Foo{} }; }", "Foo", 1, 1,
+				0, 1, 0, 0, 0);
 	}
 
 	/**
@@ -55,8 +55,8 @@ public class TypeVisitorNestedTest extends TypeVisitorTest {
 	 */
 	@Test
 	public void test_NestedDeclarationInLocalDeclaration_Dec_0_AnonDec_0_LocalDec_0_NestedDec0_Ref_0_LocalRef_0_NestedRef_0() {
-		configureParser("package bar; public class Other { public void method() { class Bar{ class Foo{} } } }",
-				"Bar.Foo", 1, 0, 0, 1, 0, 0, 0);
+		configureParser("package bar; public class Other { public void method() { class Bar{ class Foo{} } } }", "Foo",
+				1, 0, 0, 1, 0, 0, 0);
 	}
 
 	/**

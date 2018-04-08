@@ -39,12 +39,20 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	 * explaining how to use the program
 	 */
 	@Test
-	public void test_ArgumentCount_2_InvalidInput() {
+	public void test_ArgumentCount_2_InvalidPath() {
 		String[] args = { "", "" };
 		TypeFinder.main(args);
-		String expected = TypeFinder.INVALID_ARGUMENT_ERROR_MESSAGE + FileManager.lineSeparator;
+		String expected = TypeFinder.INVALID_PATH_ERROR_MESSAGE + FileManager.lineSeparator;
 		String results = errContent.toString();
 		assertEquals(expected, results);
+	}
+
+	@Test
+	public void test_ArgumentCount2() {
+		String[] directory = new String[2];
+		directory[0] = _TestSuite.TYPE_FINDER_TEST_DIR.concat("SENG300W18Iter1/");
+		directory[1] = _TestSuite.TYPE_FINDER_TEST_DIR.concat("JarsInDirectory/");
+		testOutputMultiArgs(directory, false);
 	}
 
 	/**
@@ -87,14 +95,6 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 		String directory = _TestSuite.TYPE_FINDER_TEST_DIR.concat("wildcardImport/");
 		testOutput(directory);
 	}
-	
-	@Test
-	public void test_ArgumentCount2() {
-		String[] directory = new String[2];
-		directory[0] = _TestSuite.TYPE_FINDER_TEST_DIR.concat("SENG300W18Iter1/");
-		directory[1] = _TestSuite.TYPE_FINDER_TEST_DIR.concat("JarsInDirectory/");
-		testOutputMultiArgs(directory, false);
-	}
 
 	/**
 	 * Check that inputting an invalid directory prompts the user with an invalid
@@ -127,14 +127,14 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	/**
 	 * Tests that TypeFinder finds and output the correct declaration and reference
 	 * counts of the given input path. Assumes that path exists and is valid. Output
-	 * is checked with Output.txt file in the input directory.
-	 * Debug default off.
-	 * 
+	 * is checked with Output.txt file in the input directory. Debug default off.
+	 *
 	 * @param path
 	 */
 	public void testOutput(String path) {
 		testOutput(path, false);
 	}
+
 	/**
 	 * Tests that TypeFinder finds and output the correct declaration and reference
 	 * counts of the given input path. Assumes that path exists and is valid. Output
@@ -148,9 +148,9 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 	public void testOutput(String path, boolean debug) {
 		String[] args;
 		if (debug) {
-			args = new String[]{"debug", path };
+			args = new String[] { "debug", path };
 		} else {
-			args = new String[]{ path };
+			args = new String[] { path };
 		}
 		TypeFinder.main(args);
 		String expectedErr = "";
@@ -160,8 +160,8 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 		// Check standard output matches Output.txt file
 		String expectedOut;
 		try {
-			String header = FileManager.lineSeparator+ "Directory: " + args[0] + FileManager.lineSeparator;
-			expectedOut =  header + FileManager.getFileContents(path.concat(OUTPUT_FILE));
+			String header = FileManager.lineSeparator + "Directory: " + args[0] + FileManager.lineSeparator;
+			expectedOut = header + FileManager.getFileContents(path.concat(OUTPUT_FILE));
 			String actualOut = outContent.toString();
 			assertEquals(expectedOut, actualOut);
 		} catch (FileNotFoundException e) {
@@ -172,33 +172,33 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 			fail("You dun goofed.");
 		}
 	}
-	
+
 	/**
-	 * 
-	 * Tests that TypeFinder finds and outputs correct declaration and reference 
+	 *
+	 * Tests that TypeFinder finds and outputs correct declaration and reference
 	 * counts for multiple paths. Assumes that path exists and is valid. Output is
 	 * checked with the Output.txt files in the input directories.
-	 * 
+	 *
 	 * @param paths
-	 * 				of directories or jars
-	 * 
+	 *            of directories or jars
+	 *
 	 * @throws IOException
 	 *             if path is invalid
-	 * 
+	 *
 	 */
 	public void testOutputMultiArgs(String[] paths, boolean debug) {
 		TypeFinder.main(paths);
 		String expectedErr = "";
 		String actualErr = errContent.toString();
 		assertEquals(expectedErr, actualErr);
-		
+
 		String expectedOut = "";
 		String actualOut = "";
 		for (String path : paths) {
 			try {
-				String header = FileManager.lineSeparator+ "Directory: " + path + FileManager.lineSeparator;
+				String header = FileManager.lineSeparator + "Directory: " + path + FileManager.lineSeparator;
 				// concatenates the Output.txt file to the expectedOut
-				expectedOut =  expectedOut.concat(header + FileManager.getFileContents(path.concat(OUTPUT_FILE)));
+				expectedOut = expectedOut.concat(header + FileManager.getFileContents(path.concat(OUTPUT_FILE)));
 			} catch (FileNotFoundException e) {
 				fail("Output.txt cannot be found at " + path);
 			} catch (IOException e) {
@@ -209,10 +209,7 @@ public class TypeFinderDirectoryTest extends TypeFinderTest {
 		}
 		actualOut = outContent.toString();
 		assertEquals(expectedOut, actualOut);
-		
-		
-		
+
 	}
-	
 
 }
