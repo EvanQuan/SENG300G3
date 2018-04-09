@@ -1,0 +1,102 @@
+\documentclass[12p]{article}
+\usepackage[margin=1in, headheight=110pt]{geometry}
+\usepackage{amssymb, amsmath, amsfonts, amsthm}
+\usepackage{mathpazo}
+\usepackage{setspace}
+% \usepackage{probsoln}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{bookmark}
+\usepackage{multicol}
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\o}}
+
+\pagestyle{fancy}
+\lhead{Group Project Iteration 3 - Team 2}
+\rhead{SENG 300 - Winter 2018}
+\title{\vspace{-6ex}Group Project Iteration 2}
+\date{\vspace{-12ex}}
+
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\setlength{\parindent}{0pt}
+\begin{document}
+% \maketitle
+\thispagestyle{fancy}
+
+\begin{titlepage}
+  \begin{center}
+    \vspace{1cm}
+    \Large{\textbf{University of Calgary}}\\
+    \Large{\textbf{SENG 300  - Introduction to Software Engineering}}
+    \vfill
+    \line(1,0){400}\\[1mm]
+    \huge{Group Project Iteration 3}\\
+    \large{Anonymous, Local and Nested Types}\\
+    \line(1,0){400}\\
+    \Large April 9, 2018\\
+    \vfill
+    \huge{Team 2}\\
+    \large
+    \begin{multicols}{2}
+      Evan Quan 10154242\\
+      Marcello Di Benedetto 30031839\\
+      Mona Agh 30033301\\
+      John Benedict Bendoza 30028470\\
+      Matthew Buhler 00332036\\
+      Tyler Chow 30024575\\
+      Dominic Demierre 300249784\\
+      Philip Dometita 30032976\\
+      Osagie Omigie 30008204\\
+      Zheng Yang Toh 10129855\\
+    \end{multicols}
+  \end{center}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+
+\onehalfspacing
+
+\setcounter{page}{1}
+
+% \begin{figure}[H]
+%   \includegraphics[width=1.00\textwidth]{StructuralDiagramIteration_2.pdf}
+%   \caption{The relationship between our main package and relevant classes provided by org.eclipse.jdt.core.dom. TypeFinder acts as the main class that handles user input, manages other classes, and output results. JavaRetriever retrieves Java file contents from the directory or .jar of choice. TypeVisitor counts the references and declarations from the Java file contents.} % TODO caption
+%   \label{fig:structural}
+% \end{figure}
+\section{Introduction}
+\section{Data Collection and Results}
+\subsection{Prevalence of Anonymous, Local, and Nested Type Declarations}
+\subsection{Usage Frequency of Anonymous, Local, and Nested Types}
+\subsection{Variability of Data from System to System}
+\subsection{Sampling and Analysing Process}
+
+
+\section{Discussion and Interpretation}
+
+\subsection{Correctness of Results}
+\subsection{Application to Other Java and non-Java Systems}
+
+\subsection{Practicality of Anonymous, Local, and Nested Types}
+\subsection{Stability of Anonymous, Local, and Nested Types}
+
+
+\section{Conclusion}
+
+
+
+
+\end{document}
